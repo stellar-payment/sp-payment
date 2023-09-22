@@ -1,0 +1,21 @@
+version: '3.5'
+services:
+  backend:
+    container_name: sp-payment-backend
+    image: stellar-payment/sp-payment-be:v0.0.1-local
+    build: 
+      context: .
+      args:
+        BUILD_TAG: v0.0.1-local
+        BUILD_TIMESTAMP: "2023-01-01 01:02:03"
+    restart: unless-stopped
+    ports:
+      - "7780:7780"
+      - "7781:7781"
+    volumes:
+      - ./data:/data
+      - ./conf:/app/conf
+      - ./migrations:/app/migrations
+    extra_hosts:
+    - "127.0.0.1:host-gateway"
+    

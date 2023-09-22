@@ -1,0 +1,1 @@
+migrate create -ext sql -dir ./migration/sql $args[0]

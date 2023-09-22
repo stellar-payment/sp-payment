@@ -1,0 +1,1 @@
+migrate -source file://./migration/sql -database "mysql://root:@tcp(localhost:3306)/fuyuna" up
