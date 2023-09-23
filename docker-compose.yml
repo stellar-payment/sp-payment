@@ -12,3 +12,7 @@ services:
         BUILD_TIMESTAMP: $BUILD_TIMESTAMP
     ports:
       - "7002:7780"
+networks:
+  default:
+    name: stellar-net
+    external: true
