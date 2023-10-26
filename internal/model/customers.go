@@ -6,7 +6,7 @@ type Customer struct {
 	LegalName    string `db:"legal_name"`
 	Phone        string `db:"phone"`
 	Email        string `db:"email"`
-	Birthdate    string `db:"birth_date"`
+	Birthdate    string `db:"birthdate"`
 	Address      string `db:"address"`
 	PhotoProfile string `db:"photo_profile"`
 }

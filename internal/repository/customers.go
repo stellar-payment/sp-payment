@@ -88,7 +88,8 @@ func (r *repository) FindCustomer(ctx context.Context, params *indto.CustomerPar
 		return
 	}
 
-	err = r.db.QueryRowxContext(ctx, stmt, args...).Scan(&res)
+	res = &indto.Customer{}
+	err = r.db.QueryRowxContext(ctx, stmt, args...).StructScan(res)
 	if err != nil && err != sql.ErrNoRows {
 		logger.Error().Err(err).Msg("sql err")
 		return

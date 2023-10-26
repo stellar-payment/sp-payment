@@ -14,7 +14,7 @@ type Customer struct {
 	LegalName    string `db:"legal_name" json:"legal_name"`
 	Phone        string `db:"phone" json:"phone"`
 	Email        string `db:"email" json:"email"`
-	Birthdate    string `db:"birth_date" json:"birth_date"`
+	Birthdate    string `db:"birthdate" json:"birth_date"`
 	Address      string `db:"address" json:"address"`
 	PhotoProfile string `db:"photo_profile" json:"photo_profile"`
 }
