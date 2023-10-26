@@ -11,7 +11,12 @@ services:
         BUILD_TAG: $BUILD_TAG 
         BUILD_TIMESTAMP: $BUILD_TIMESTAMP
     ports:
-      - "7002:7780"
+      - "7003:7780"
+    volumes:
+      - /home/fuyuna/services/sp-payment/data:/data
+      - /home/fuyuna/services/sp-payment/conf:/app/conf
+      - /home/fuyuna/services/sp-payment/migrations:/app/migrations
+
 networks:
   default:
     name: stellar-net
