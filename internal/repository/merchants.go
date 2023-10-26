@@ -124,7 +124,7 @@ func (r *repository) UpdateMerchant(ctx context.Context, payload *model.Merchant
 	logger := zerolog.Ctx(ctx)
 
 	stmt, args, err := pgSquirrel.Update("merchants").SetMap(map[string]interface{}{
-		"legal_name":    payload.Name,
+		"name":          payload.Name,
 		"phone":         payload.Phone,
 		"email":         payload.Email,
 		"address":       payload.Address,
