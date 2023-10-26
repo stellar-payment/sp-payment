@@ -42,4 +42,14 @@ func Init(params *InitRouterParams) {
 	secureRouter.OPTIONS(customerIDPath, handler.HandleUpdateCustomers(params.Service.UpdateCustomer))
 	secureRouter.DELETE(customerIDPath, handler.HandleDeleteCustomer(params.Service.DeleteCustomer))
 	secureRouter.OPTIONS(customerIDPath, handler.HandleDeleteCustomer(params.Service.DeleteCustomer))
+
+	// ----- Merchants
+	secureRouter.GET(merchantBasepath, handler.HandleGetMerchants(params.Service.GetAllMerchant))
+	secureRouter.OPTIONS(merchantBasepath, handler.HandleGetMerchants(params.Service.GetAllMerchant))
+	secureRouter.GET(merchantIDPath, handler.HandleGetMerchantByID(params.Service.GetMerchant))
+	secureRouter.OPTIONS(merchantIDPath, handler.HandleGetMerchantByID(params.Service.GetMerchant))
+	secureRouter.PUT(merchantIDPath, handler.HandleUpdateMerchants(params.Service.UpdateMerchant))
+	secureRouter.OPTIONS(merchantIDPath, handler.HandleUpdateMerchants(params.Service.UpdateMerchant))
+	secureRouter.DELETE(merchantIDPath, handler.HandleDeleteMerchant(params.Service.DeleteMerchant))
+	secureRouter.OPTIONS(merchantIDPath, handler.HandleDeleteMerchant(params.Service.DeleteMerchant))
 }

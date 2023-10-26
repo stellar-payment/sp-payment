@@ -7,4 +7,8 @@ const (
 	// ----- Customers
 	customerBasepath = basePath + "/customers"
 	customerIDPath   = customerBasepath + "/:customerID"
+
+	// ----- Merchants
+	merchantBasepath = basePath + "/merchants"
+	merchantIDPath   = merchantBasepath + "/:merchantID"
 )

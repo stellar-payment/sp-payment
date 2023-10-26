@@ -19,6 +19,14 @@ type Repository interface {
 	CreateCustomer(ctx context.Context, payload *model.Customer) (res *model.Customer, err error)
 	UpdateCustomer(ctx context.Context, payload *model.Customer) (err error)
 	DeleteCustomer(ctx context.Context, params *indto.CustomerParams) (err error)
+
+	// ----- Merchants
+	FindMerchants(ctx context.Context, params *indto.MerchantParams) (res []*indto.Merchant, err error)
+	CountMerchants(ctx context.Context, params *indto.MerchantParams) (res int64, err error)
+	FindMerchant(ctx context.Context, params *indto.MerchantParams) (res *indto.Merchant, err error)
+	CreateMerchant(ctx context.Context, payload *model.Merchant) (res *model.Merchant, err error)
+	UpdateMerchant(ctx context.Context, payload *model.Merchant) (err error)
+	DeleteMerchant(ctx context.Context, params *indto.MerchantParams) (err error)
 }
 
 type repository struct {

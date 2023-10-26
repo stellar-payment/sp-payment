@@ -1,6 +1,7 @@
 package indto
 
 type MerchantParams struct {
+	UserID     string
 	MerchantID string
 	Keyword    string
 	Limit      uint64
@@ -10,7 +11,7 @@ type MerchantParams struct {
 type Merchant struct {
 	ID           string `db:"id"`
 	UserID       string `db:"user_id"`
-	LegalName    string `db:"name"`
+	Name         string `db:"name"`
 	Phone        string `db:"phone"`
 	Address      string `db:"address"`
 	Email        string `db:"email"`

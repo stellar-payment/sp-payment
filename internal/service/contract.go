@@ -22,6 +22,14 @@ type Service interface {
 	UpdateCustomer(ctx context.Context, params *dto.CustomersQueryParams, payload *dto.CustomerPayload) (err error)
 	DeleteCustomer(ctx context.Context, params *dto.CustomersQueryParams) (err error)
 	HandleDeleteCustomer(ctx context.Context, payload *indto.Customer) (err error)
+
+	// ----- Merchants
+	GetAllMerchant(ctx context.Context, params *dto.MerchantsQueryParams) (res *dto.ListMerchantResponse, err error)
+	GetMerchant(ctx context.Context, params *dto.MerchantsQueryParams) (res *dto.MerchantResponse, err error)
+	HandleCreateMerchant(ctx context.Context, payload *indto.Merchant) (err error)
+	UpdateMerchant(ctx context.Context, params *dto.MerchantsQueryParams, payload *dto.MerchantPayload) (err error)
+	DeleteMerchant(ctx context.Context, params *dto.MerchantsQueryParams) (err error)
+	HandleDeleteMerchant(ctx context.Context, payload *indto.Merchant) (err error)
 }
 
 type service struct {
