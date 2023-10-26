@@ -10,7 +10,6 @@ import (
 	"github.com/stellar-payment/sp-payment/internal/indto"
 	"github.com/stellar-payment/sp-payment/internal/model"
 	"github.com/stellar-payment/sp-payment/internal/util/scopeutil"
-	"github.com/stellar-payment/sp-payment/internal/util/timeutil"
 	"github.com/stellar-payment/sp-payment/pkg/dto"
 	"github.com/stellar-payment/sp-payment/pkg/errs"
 )
@@ -70,7 +69,7 @@ func (s *service) GetAllCustomer(ctx context.Context, params *dto.CustomersQuery
 			LegalName:    v.LegalName,
 			Phone:        v.Phone,
 			Email:        v.Email,
-			Birthdate:    timeutil.FormatDate(v.Birthdate),
+			Birthdate:    v.Birthdate,
 			Address:      v.Address,
 			PhotoProfile: v.PhotoProfile,
 		}
@@ -104,7 +103,7 @@ func (s *service) GetCustomer(ctx context.Context, params *dto.CustomersQueryPar
 		LegalName:    data.LegalName,
 		Phone:        data.Phone,
 		Email:        data.Email,
-		Birthdate:    timeutil.FormatDate(data.Birthdate),
+		Birthdate:    data.Birthdate,
 		Address:      data.Address,
 		PhotoProfile: data.PhotoProfile,
 	}
@@ -121,7 +120,7 @@ func (s *service) HandleCreateCustomer(ctx context.Context, payload *indto.Custo
 		LegalName:    payload.LegalName,
 		Phone:        payload.Phone,
 		Email:        payload.Email,
-		Birthdate:    timeutil.ParseDate(payload.BirthdateString),
+		Birthdate:    payload.Birthdate,
 		Address:      payload.Address,
 		PhotoProfile: payload.PhotoProfile,
 	}
@@ -151,7 +150,7 @@ func (s *service) UpdateCustomer(ctx context.Context, params *dto.CustomersQuery
 		LegalName:    payload.LegalName,
 		Phone:        payload.Phone,
 		Email:        payload.Email,
-		Birthdate:    timeutil.ParseDate(payload.Birthdate),
+		Birthdate:    payload.Birthdate,
 		Address:      payload.Address,
 		PhotoProfile: payload.PhotoProfile,
 	}
