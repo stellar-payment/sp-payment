@@ -4,34 +4,34 @@ import (
 	"fmt"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog"
 	"github.com/stellar-payment/sp-payment/internal/config"
 )
 
-type InitMariaDBParams struct {
-	Conf   *config.MariaDBConfig
+type InitPostgresParams struct {
+	Conf   *config.PostgresConfig
 	Logger zerolog.Logger
 }
 
-func InitMariaDB(params *InitMariaDBParams) (db *sqlx.DB, err error) {
+func InitPostgres(params *InitPostgresParams) (db *sqlx.DB, err error) {
 	dataSource := fmt.Sprintf(
-		"%s:%s@tcp(%s)/%s?parseTime=true",
+		"postgres://%s:%s@%s/%s",
 		params.Conf.Username, params.Conf.Password,
 		params.Conf.Address, params.Conf.DBName,
 	)
 
 	for i := 10; i > 0; i-- {
-		db, err = sqlx.Connect("mysql", dataSource)
+		db, err = sqlx.Connect("pgx", dataSource)
 		if err == nil {
 			break
 		}
 
-		params.Logger.Error().Msgf("failed to init opening db for %s, retrying in 1 second", dataSource)
+		params.Logger.Error().Err(err).Msgf("failed to init opening db for %s, retrying in 1 second", dataSource)
 		time.Sleep(1 * time.Second)
 	}
 
@@ -45,7 +45,7 @@ func InitMariaDB(params *InitMariaDBParams) (db *sqlx.DB, err error) {
 			break
 		}
 
-		params.Logger.Error().Msgf("failed to ping db for %s, retrying in 1 second", dataSource)
+		params.Logger.Error().Err(err).Msgf("failed to ping db for %s, retrying in 1 second", dataSource)
 		time.Sleep(1 * time.Second)
 	}
 
@@ -59,7 +59,9 @@ func InitMariaDB(params *InitMariaDBParams) (db *sqlx.DB, err error) {
 		return
 	}
 
-	dbMigrate, err := migrate.New("file://migrations", fmt.Sprintf("mysql://%s", dataSource))
+	dbMigrate, err := migrate.New("file://migrations", fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable",
+		params.Conf.Username, params.Conf.Password,
+		params.Conf.Address, params.Conf.DBName))
 	if err != nil {
 		params.Logger.Error().Err(err).Msg("failed to connect migration engine")
 		return

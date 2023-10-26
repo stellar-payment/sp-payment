@@ -1,6 +1,8 @@
 package echttputil
 
 import (
+	"bytes"
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -25,4 +27,9 @@ func WriteErrorResponse(ec echo.Context, err error) error {
 
 func WriteFileAttachment(ec echo.Context, path string, filename string) error {
 	return ec.Attachment(path, filename)
+}
+
+func WriteFileBufferAttachment(ec echo.Context, file *bytes.Buffer, contentType string, filename string) error {
+	ec.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment;filename=\"%s\"", filename))
+	return ec.Blob(http.StatusOK, contentType, file.Bytes())
 }

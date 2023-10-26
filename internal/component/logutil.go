@@ -39,7 +39,7 @@ func NewLogger(params NewLoggerParams) zerolog.Logger {
 	var output zerolog.LevelWriter
 	conf := config.Get()
 
-	if env := os.Getenv("ENVIRONMENT"); env == string(config.EnvironmentLocal) {
+	if env := os.Getenv("ENVIRONMENT"); env == string(config.EnvironmentLocal) && conf.FFJsonLogger != "1" {
 		output = zerolog.MultiLevelWriter(zerolog.ConsoleWriter{
 			Out: os.Stdout,
 		})

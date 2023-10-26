@@ -17,4 +17,5 @@ type ListPaginations struct {
 	Limit     uint64 `json:"limit"`
 	Page      uint64 `json:"page"`
 	TotalPage uint64 `json:"total_page"`
+	TotalItem uint64 `json:"total_item,omitempty"`
 }

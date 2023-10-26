@@ -1,3 +1,5 @@
 package indto
 
-type UserScopeMap map[string]bool
+type UserAccess struct {
+	AccessToken string 
+}

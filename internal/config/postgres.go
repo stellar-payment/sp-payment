@@ -1,6 +1,6 @@
 package config
 
-type MariaDBConfig struct {
+type PostgresConfig struct {
 	Address  string `json:"address"`
 	Username string `json:"username"`
 	Password string `json:"password"`

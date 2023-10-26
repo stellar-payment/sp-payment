@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/stellar-payment/sp-payment/internal/config"
 	"golang.org/x/time/rate"
 )
 
@@ -43,21 +44,21 @@ func NewRequester[T any]() Requester[T] {
 	return t
 }
 
-func (r *Requester[T]) SendRequest(ctx context.Context, endpoint string, method string, params map[string]string, body io.Reader) (res *T, err error) {
+func (r *Requester[T]) SendRequest(ctx context.Context, endpoint string, method string, header map[string]string, body io.Reader) (res *T, err error) {
 	req, err := http.NewRequestWithContext(ctx, method, endpoint, body)
 	if err != nil {
 		return
 	}
 
-	req.Header.Add("User-Agent", "Stellar-Microservice by Misaki-chan")
+	conf := config.Get()
+	req.Header.Add("User-Agent", fmt.Sprintf("%s-%s", conf.ServiceName, conf.BuildVer))
 	req.Header.Add("Content-Type", "application/json")
 
-	queryParam := req.URL.Query()
-	for k, v := range params {
-		queryParam.Add(k, v)
+	for k, v := range header {
+		req.Header.Add(k, v)
 	}
 
-	req.URL.RawQuery = queryParam.Encode()
+	res = new(T)
 	data, err := r.Client.Do(req)
 	if err != nil {
 		return

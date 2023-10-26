@@ -1,0 +1,1 @@
+alter table transactions add column description text not null;

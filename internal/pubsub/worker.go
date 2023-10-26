@@ -2,48 +2,74 @@ package pubsub
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/rs/zerolog"
-	"github.com/stellar-payment/sp-payment/internal/commonkey"
+	"github.com/stellar-payment/sp-payment/internal/inconst"
 	"github.com/stellar-payment/sp-payment/internal/indto"
 	"github.com/stellar-payment/sp-payment/internal/service"
-	"github.com/stellar-payment/sp-payment/internal/util/ctxutil"
 )
 
-var (
-	tagLoggerPBListen = "[PubSub-Listen]"
-)
-
-type FilePubSub struct {
+type EventPubSub struct {
 	logger  zerolog.Logger
 	redis   *redis.Client
 	service service.Service
 }
 
-type NewFilePubSubParams struct {
+type NewEventPubSubParams struct {
 	Logger  zerolog.Logger
 	Redis   *redis.Client
 	Service service.Service
 }
 
-func NewFileSub(params NewFilePubSubParams) *FilePubSub {
-	return &FilePubSub{
+func NewEventPubSub(params *NewEventPubSubParams) *EventPubSub {
+	return &EventPubSub{
 		logger:  params.Logger,
 		redis:   params.Redis,
 		service: params.Service,
 	}
 }
 
-func (pb *FilePubSub) Listen() {
+func (pb *EventPubSub) Listen() {
 	ctx := context.Background()
-	ctx = ctxutil.WrapCtx(ctx, commonkey.SCOPE_CTX_KEY, indto.UserScopeMap{})
 
-	subscriber := pb.redis.Subscribe(ctx, "")
+	subscriber := pb.redis.Subscribe(ctx,
+		inconst.TOPIC_CREATE_CUSTOMER,
+		inconst.TOPIC_DELETE_CUSTOMER,
+		inconst.TOPIC_CREATE_MERCHANT,
+		inconst.TOPIC_DELETE_MERCHANT,
+		inconst.TOPIC_CREATE_TRX,
+	)
 
 	defer subscriber.Close()
 	for msg := range subscriber.Channel() {
-		fmt.Print(msg)
+		switch msg.Channel {
+		case inconst.TOPIC_CREATE_CUSTOMER:
+			data := &indto.Customer{}
+			if err := json.Unmarshal([]byte(msg.Payload), data); err != nil {
+				pb.logger.Warn().Err(err).Str("channel", msg.Channel).Msg("failed to marshal payload")
+				continue
+			}
+
+			if err := pb.service.HandleCreateCustomer(context.Background(), data); err != nil {
+				pb.logger.Warn().Err(err).Str("channel", msg.Channel).Send()
+				continue
+			}
+		case inconst.TOPIC_DELETE_CUSTOMER:
+			data := &indto.Customer{}
+			if err := json.Unmarshal([]byte(msg.Payload), data); err != nil {
+				pb.logger.Warn().Err(err).Str("channel", msg.Channel).Msg("failed to marshal payload")
+				continue
+			}
+
+			if err := pb.service.HandleDeleteCustomer(context.Background(), data); err != nil {
+				pb.logger.Warn().Err(err).Str("channel", msg.Channel).Send()
+				continue
+			}
+		case inconst.TOPIC_CREATE_MERCHANT:
+		case inconst.TOPIC_DELETE_MERCHANT:
+		case inconst.TOPIC_CREATE_TRX:
+		}
 	}
 }

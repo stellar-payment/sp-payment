@@ -1,6 +1,10 @@
 package router
 
 const (
-	basePath = "/api/v1"
+	basePath = "/payment/api/v1"
 	PingPath = basePath + "/ping"
+
+	// ----- Customers
+	customerBasepath = basePath + "/customers"
+	customerIDPath   = customerBasepath + "/:customerID"
 )

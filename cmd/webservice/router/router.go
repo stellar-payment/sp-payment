@@ -27,5 +27,19 @@ func Init(params *InitRouterParams) {
 		middleware.HandlerLogger(&params.Logger),
 	)
 
-	params.Ec.GET(PingPath, handler.HandlePing(params.Service.Ping))
+	plainRouter := params.Ec.Group("")
+	secureRouter := params.Ec.Group("", middleware.AuthorizationMiddleware(params.Service))
+
+	// ----- Maintenance
+	plainRouter.GET(PingPath, handler.HandlePing(params.Service.Ping))
+
+	// ----- Customers
+	secureRouter.GET(customerBasepath, handler.HandleGetCustomers(params.Service.GetAllCustomer))
+	secureRouter.OPTIONS(customerBasepath, handler.HandleGetCustomers(params.Service.GetAllCustomer))
+	secureRouter.GET(customerIDPath, handler.HandleGetCustomerByID(params.Service.GetCustomer))
+	secureRouter.OPTIONS(customerIDPath, handler.HandleGetCustomerByID(params.Service.GetCustomer))
+	secureRouter.PUT(customerIDPath, handler.HandleUpdateCustomers(params.Service.UpdateCustomer))
+	secureRouter.OPTIONS(customerIDPath, handler.HandleUpdateCustomers(params.Service.UpdateCustomer))
+	secureRouter.DELETE(customerIDPath, handler.HandleDeleteCustomer(params.Service.DeleteCustomer))
+	secureRouter.OPTIONS(customerIDPath, handler.HandleDeleteCustomer(params.Service.DeleteCustomer))
 }

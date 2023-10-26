@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"bytes"
+	"encoding/json"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -66,32 +68,35 @@ func RequestBodyLogger(logger *zerolog.Logger) echo.MiddlewareFunc {
 		},
 
 		Handler: func(c echo.Context, in []byte, out []byte) {
-			logger.Info().
-				Str("request-id", c.Response().Header().Get(echo.HeaderXRequestID)).
-				Any("request-header", c.Request().Header).Send()
+			loggerInfo := logger.Info()
+
+			loggerInfo = loggerInfo.Str("request-id", c.Response().Header().Get(echo.HeaderXRequestID)).
+				Any("request-header", c.Request().Header)
 			if string(in) != "" {
-				logger.Info().
-					Str("request-id", c.Response().Header().Get(echo.HeaderXRequestID)).
-					RawJSON("request-body", in).Send()
+				compactJson := &bytes.Buffer{}
+				if err := json.Compact(compactJson, in); err != nil {
+					logger.Warn().Err(err).Msg("failed to minify json req")
+				} else {
+					loggerInfo = loggerInfo.RawJSON("request-body", compactJson.Bytes())
+				}
 			}
 
-			logger.Info().
-				Str("request-id", c.Response().Header().Get(echo.HeaderXRequestID)).
-				Any("response-header", c.Response().Header()).Send()
+			loggerInfo = loggerInfo.Any("response-header", c.Response().Header())
 			if string(out) != "" {
 				if !strings.Contains(c.Response().Header().Get("Content-Type"), "application/json") {
 					// if c.Response().Header().Get("Content-Type") != "application/json" {
-					logger.Info().
-						Str("request-id", c.Response().Header().Get(echo.HeaderXRequestID)).
-						Str("response-body", "<non-json response>").Send()
+					loggerInfo = loggerInfo.Str("response-body", "<non-json response>")
 				} else {
-					logger.Info().
-						Str("request-id", c.Response().Header().Get(echo.HeaderXRequestID)).
-						RawJSON("response-body", out).Send()
-
+					compactJson := &bytes.Buffer{}
+					if err := json.Compact(compactJson, out); err != nil {
+						logger.Warn().Err(err).Msg("failed to minify json req")
+					} else {
+						loggerInfo = loggerInfo.RawJSON("response-body", compactJson.Bytes())
+					}
 				}
-
 			}
+
+			loggerInfo.Send()
 		},
 	})
 }
