@@ -68,7 +68,27 @@ func (pb *EventPubSub) Listen() {
 				continue
 			}
 		case inconst.TOPIC_CREATE_MERCHANT:
+			data := &indto.Merchant{}
+			if err := json.Unmarshal([]byte(msg.Payload), data); err != nil {
+				pb.logger.Warn().Err(err).Str("channel", msg.Channel).Msg("failed to marshal payload")
+				continue
+			}
+
+			if err := pb.service.HandleCreateMerchant(context.Background(), data); err != nil {
+				pb.logger.Warn().Err(err).Str("channel", msg.Channel).Send()
+				continue
+			}
 		case inconst.TOPIC_DELETE_MERCHANT:
+			data := &indto.Merchant{}
+			if err := json.Unmarshal([]byte(msg.Payload), data); err != nil {
+				pb.logger.Warn().Err(err).Str("channel", msg.Channel).Msg("failed to marshal payload")
+				continue
+			}
+
+			if err := pb.service.HandleDeleteMerchant(context.Background(), data); err != nil {
+				pb.logger.Warn().Err(err).Str("channel", msg.Channel).Send()
+				continue
+			}
 		case inconst.TOPIC_CREATE_TRX:
 		}
 	}
