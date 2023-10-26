@@ -9,14 +9,14 @@ type MerchantParams struct {
 }
 
 type Merchant struct {
-	ID           string `db:"id"`
-	UserID       string `db:"user_id"`
-	Name         string `db:"name"`
-	Phone        string `db:"phone"`
-	Address      string `db:"address"`
-	Email        string `db:"email"`
-	PICName      string `db:"pic_name"`
-	PICEmail     string `db:"pic_email"`
-	PICPhone     string `db:"pic_phone"`
-	PhotoProfile string `db:"photo_profile"`
+	ID           string `db:"id" json:"id"`
+	UserID       string `db:"user_id" json:"user_id"`
+	Name         string `db:"name" json:"name"`
+	Phone        string `db:"phone" json:"phone"`
+	Address      string `db:"address" json:"address"`
+	Email        string `db:"email" json:"email"`
+	PICName      string `db:"pic_name" json:"pic_name"`
+	PICEmail     string `db:"pic_email" json:"pic_email"`
+	PICPhone     string `db:"pic_phone" json:"pic_phone"`
+	PhotoProfile string `db:"photo_profile" json:"photo_profile"`
 }
