@@ -38,6 +38,7 @@ func AES256Decrypt(msg, iv, key []byte) (res []byte, err error) {
 	}
 
 	encryptor := cipher.NewCBCDecrypter(block, iv)
+
 	res = make([]byte, len(msg))
 	encryptor.CryptBlocks(res, msg)
 
@@ -130,7 +131,7 @@ func EncryptField(msg []byte, key []byte, rowHash *[]byte) (res []byte) {
 
 func DecryptField(ct []byte, key []byte) (res string) {
 	iv := ct[len(ct)-16:]
-	ct = ct[:16]
+	ct = ct[:len(ct)-16]
 
 	ct, err := AES256Decrypt(ct, iv, key)
 	if err != nil {
