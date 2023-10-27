@@ -80,6 +80,14 @@ func HMACSHA512(msg []byte, key []byte) []byte {
 	return digest.Sum(nil)
 }
 
+func VerifyHMACSHA512(msg, key, hash []byte) bool {
+	digest := hmac.New(sha512.New, key)
+	digest.Write(msg)
+	genHash := digest.Sum(nil)
+
+	return hmac.Equal(genHash, hash)
+}
+
 func LoadPublicKey(key []byte) (pk *rsa.PublicKey, err error) {
 	block, _ := pem.Decode(key)
 	if block == nil {

@@ -18,7 +18,7 @@ func (r *repository) FindCustomers(ctx context.Context, params *indto.CustomerPa
 		squirrel.Eq{"c.deleted_at": nil},
 	}
 
-	baseStmt := pgSquirrel.Select("c.id", "c.user_id", "c.legal_name", "c.phone", "c.email", "c.birthdate", "c.address", "c.photo_profile").
+	baseStmt := pgSquirrel.Select("c.id", "c.user_id", "c.legal_name", "c.phone", "c.email", "c.birthdate", "c.address", "c.photo_profile", "c.row_hash").
 		From("customers c").Where(cond)
 
 	if params.Limit != 0 && params.Page >= 1 {
@@ -82,7 +82,7 @@ func (r *repository) FindCustomer(ctx context.Context, params *indto.CustomerPar
 		squirrel.Eq{"c.deleted_at": nil},
 	}
 
-	stmt, args, err := pgSquirrel.Select("c.id", "c.user_id", "c.legal_name", "c.phone", "c.email", "c.birthdate", "c.address", "c.photo_profile").From("customers c").Where(cond).ToSql()
+	stmt, args, err := pgSquirrel.Select("c.id", "c.user_id", "c.legal_name", "c.phone", "c.email", "c.birthdate", "c.address", "c.photo_profile", "c.row_hash").From("customers c").Where(cond).ToSql()
 	if err != nil {
 		logger.Error().Err(err).Msg("squirrel err")
 		return
@@ -103,8 +103,8 @@ func (r *repository) FindCustomer(ctx context.Context, params *indto.CustomerPar
 func (r *repository) CreateCustomer(ctx context.Context, payload *model.Customer) (res *model.Customer, err error) {
 	logger := zerolog.Ctx(ctx)
 
-	stmt, args, err := pgSquirrel.Insert("customers").Columns("id", "user_id", "legal_name", "phone", "email", "birthdate", "address", "photo_profile").
-		Values(payload.ID, payload.UserID, payload.LegalName, payload.Phone, payload.Email, payload.Birthdate, payload.Address, payload.PhotoProfile).ToSql()
+	stmt, args, err := pgSquirrel.Insert("customers").Columns("id", "user_id", "legal_name", "phone", "email", "birthdate", "address", "photo_profile", "row_hash").
+		Values(payload.ID, payload.UserID, payload.LegalName, payload.Phone, payload.Email, payload.Birthdate, payload.Address, payload.PhotoProfile, payload.RowHash).ToSql()
 	if err != nil {
 		logger.Error().Err(err).Msg("squirrel err")
 		return
@@ -129,6 +129,7 @@ func (r *repository) UpdateCustomer(ctx context.Context, payload *model.Customer
 		"address":       payload.Address,
 		"birthdate":     payload.Birthdate,
 		"photo_profile": payload.PhotoProfile,
+		"row_hash":      payload.RowHash,
 		"updated_at":    time.Now(),
 	}).Where(squirrel.And{
 		squirrel.Eq{"id": payload.ID},

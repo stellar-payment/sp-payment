@@ -18,7 +18,7 @@ func (r *repository) FindMerchants(ctx context.Context, params *indto.MerchantPa
 		squirrel.Eq{"m.deleted_at": nil},
 	}
 
-	baseStmt := pgSquirrel.Select("m.id", "m.user_id", "m.name", "m.address", "m.phone", "m.email", "m.pic_name", "m.pic_email", "m.pic_phone", "m.photo_profile").
+	baseStmt := pgSquirrel.Select("m.id", "m.user_id", "m.name", "m.address", "m.phone", "m.email", "m.pic_name", "m.pic_email", "m.pic_phone", "m.photo_profile", "m.row_hash").
 		From("merchants m").Where(cond)
 
 	if params.Limit != 0 && params.Page >= 1 {
@@ -82,7 +82,7 @@ func (r *repository) FindMerchant(ctx context.Context, params *indto.MerchantPar
 		squirrel.Eq{"m.deleted_at": nil},
 	}
 
-	stmt, args, err := pgSquirrel.Select("m.id", "m.user_id", "m.name", "m.address", "m.phone", "m.email", "m.pic_name", "m.pic_email", "m.pic_phone", "m.photo_profile").
+	stmt, args, err := pgSquirrel.Select("m.id", "m.user_id", "m.name", "m.address", "m.phone", "m.email", "m.pic_name", "m.pic_email", "m.pic_phone", "m.photo_profile", "m.row_hash").
 		From("merchants m").Where(cond).ToSql()
 	if err != nil {
 		logger.Error().Err(err).Msg("squirrel err")
@@ -104,8 +104,8 @@ func (r *repository) FindMerchant(ctx context.Context, params *indto.MerchantPar
 func (r *repository) CreateMerchant(ctx context.Context, payload *model.Merchant) (res *model.Merchant, err error) {
 	logger := zerolog.Ctx(ctx)
 
-	stmt, args, err := pgSquirrel.Insert("merchants").Columns("id", "user_id", "name", "phone", "email", "address", "pic_name", "pic_email", "pic_phone", "photo_profile").
-		Values(payload.ID, payload.UserID, payload.Name, payload.Phone, payload.Email, payload.Address, payload.PICName, payload.PICEmail, payload.PICPhone, payload.PhotoProfile).ToSql()
+	stmt, args, err := pgSquirrel.Insert("merchants").Columns("id", "user_id", "name", "phone", "email", "address", "pic_name", "pic_email", "pic_phone", "photo_profile", "row_hash").
+		Values(payload.ID, payload.UserID, payload.Name, payload.Phone, payload.Email, payload.Address, payload.PICName, payload.PICEmail, payload.PICPhone, payload.PhotoProfile, payload.RowHash).ToSql()
 	if err != nil {
 		logger.Error().Err(err).Msg("squirrel err")
 		return
@@ -132,6 +132,7 @@ func (r *repository) UpdateMerchant(ctx context.Context, payload *model.Merchant
 		"pic_phone":     payload.PICPhone,
 		"pic_email":     payload.PICEmail,
 		"photo_profile": payload.PhotoProfile,
+		"row_hash":      payload.RowHash,
 		"updated_at":    time.Now(),
 	}).Where(squirrel.And{
 		squirrel.Eq{"id": payload.ID},

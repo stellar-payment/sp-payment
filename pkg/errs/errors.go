@@ -21,6 +21,7 @@ var (
 	ErrUserExisted              = errors.New("user already existed")
 	ErrUserDeactivated          = errors.New("user is deactivated")
 	ErrMissingRequiredAttribute = errors.New("attribute %s is missing")
+	ErrDataIntegrity            = errors.New("%s data integrity is compromised")
 )
 
 type CustomError struct {
@@ -65,6 +66,7 @@ const (
 	ErrCodeTokenExpired             constant.ErrCode = 403021
 	ErrCodeUserExisted              constant.ErrCode = 400022
 	ErrCodeUserDeactivated          constant.ErrCode = 403023
+	ErrCodeDataIntegrity            constant.ErrCode = 500999
 )
 
 const (
@@ -88,6 +90,7 @@ var errorMap = map[error]dto.ErrorResponse{
 	ErrUserExisted:              ErrorResponse(ErrStatusClient, ErrCodeUserExisted, ErrDuplicatedResources),
 	ErrUserDeactivated:          ErrorResponse(ErrStatusNoAccess, ErrCodeUserDeactivated, ErrUserDeactivated),
 	ErrMissingRequiredAttribute: ErrorResponse(ErrStatusClient, ErrCodeMissingRequiredAttribute, ErrMissingRequiredAttribute),
+	ErrDataIntegrity: ErrorResponse(ErrStatusUnknown, ErrCodeDataIntegrity, ErrDataIntegrity),
 }
 
 func ErrorResponse(status int, code constant.ErrCode, err error) dto.ErrorResponse {

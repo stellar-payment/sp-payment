@@ -78,6 +78,24 @@ func (s *service) GetAllCustomer(ctx context.Context, params *dto.CustomersQuery
 			PhotoProfile: v.PhotoProfile,
 		}
 
+		hash := v.LegalName
+		hash = append(hash, v.Phone...)
+		hash = append(hash, v.Email...)
+		hash = append(hash, v.Birthdate...)
+		hash = append(hash, v.Address...)
+
+		if len(v.RowHash) != 0 {
+			if !cryptoutil.VerifyHMACSHA512(hash, conf.HashKey, v.RowHash) {
+				err = errs.New(errs.ErrDataIntegrity, "customer")
+				logger.Error().Err(err).Send()
+				return
+			}
+		} else {
+			err = errs.New(errs.ErrDataIntegrity, "customer")
+			logger.Error().Err(err).Str("customer-id", v.ID).Msg("row hash not found")
+			return
+		}
+
 		res.Customers = append(res.Customers, temp)
 	}
 
@@ -111,6 +129,24 @@ func (s *service) GetCustomer(ctx context.Context, params *dto.CustomersQueryPar
 		Birthdate:    cryptoutil.DecryptField(data.Birthdate, conf.DBKey),
 		Address:      cryptoutil.DecryptField(data.Address, conf.DBKey),
 		PhotoProfile: data.PhotoProfile,
+	}
+
+	hash := data.LegalName
+	hash = append(hash, data.Phone...)
+	hash = append(hash, data.Email...)
+	hash = append(hash, data.Birthdate...)
+	hash = append(hash, data.Address...)
+
+	if len(data.RowHash) != 0 {
+		if !cryptoutil.VerifyHMACSHA512(hash, conf.HashKey, data.RowHash) {
+			err = errs.New(errs.ErrDataIntegrity, "customer")
+			logger.Error().Err(err).Send()
+			return
+		}
+	} else {
+		err = errs.New(errs.ErrDataIntegrity, "customer")
+		logger.Error().Err(err).Str("customer-id", data.ID).Msg("row hash not found")
+		return
 	}
 
 	return
