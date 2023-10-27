@@ -86,14 +86,10 @@ func (s *service) GetAllCustomer(ctx context.Context, params *dto.CustomersQuery
 
 		if len(v.RowHash) != 0 {
 			if !cryptoutil.VerifyHMACSHA512(hash, conf.HashKey, v.RowHash) {
-				err = errs.New(errs.ErrDataIntegrity, "customer")
-				logger.Error().Err(err).Send()
-				return
+				logger.Warn().Err(errs.New(errs.ErrDataIntegrity, "customer")).Send()
 			}
 		} else {
-			err = errs.New(errs.ErrDataIntegrity, "customer")
-			logger.Error().Err(err).Str("customer-id", v.ID).Msg("row hash not found")
-			return
+			logger.Warn().Err(errs.New(errs.ErrDataIntegrity, "customer")).Str("customer-id", v.ID).Msg("row hash not found")
 		}
 
 		res.Customers = append(res.Customers, temp)

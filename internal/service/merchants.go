@@ -80,6 +80,18 @@ func (s *service) GetAllMerchant(ctx context.Context, params *dto.MerchantsQuery
 			PhotoProfile: v.PhotoProfile,
 		}
 
+		hash := v.PICName
+		hash = append(hash, v.PICEmail...)
+		hash = append(hash, v.PICPhone...)
+
+		if len(v.RowHash) != 0 {
+			if !cryptoutil.VerifyHMACSHA512(hash, conf.HashKey, v.RowHash) {
+				logger.Warn().Err(errs.New(errs.ErrDataIntegrity, "merchant")).Send()
+			}
+		} else {
+			logger.Warn().Err(errs.New(errs.ErrDataIntegrity, "merchant")).Str("merchant-id", v.ID).Msg("row hash not found")
+		}
+
 		res.Merchants = append(res.Merchants, temp)
 	}
 
@@ -115,6 +127,22 @@ func (s *service) GetMerchant(ctx context.Context, params *dto.MerchantsQueryPar
 		PICEmail:     cryptoutil.DecryptField(data.PICEmail, conf.DBKey),
 		PICPhone:     cryptoutil.DecryptField(data.PICPhone, conf.DBKey),
 		PhotoProfile: data.PhotoProfile,
+	}
+
+	hash := data.PICName
+	hash = append(hash, data.PICEmail...)
+	hash = append(hash, data.PICPhone...)
+
+	if len(data.RowHash) != 0 {
+		if !cryptoutil.VerifyHMACSHA512(hash, conf.HashKey, data.RowHash) {
+			err = errs.New(errs.ErrDataIntegrity, "merchant")
+			logger.Error().Err(err).Send()
+			return
+		}
+	} else {
+		err = errs.New(errs.ErrDataIntegrity, "merchant")
+		logger.Error().Err(err).Str("merchant-id", data.ID).Msg("row hash not found")
+		return
 	}
 
 	return
