@@ -1,9 +1,9 @@
 package config
 
 import (
+	"encoding/base64"
 	"log"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/godruoyi/go-snowflake"
@@ -26,6 +26,9 @@ type Config struct {
 	FFJsonLogger string
 
 	AuthServiceAddr string
+
+	DBKey   []byte
+	HashKey []byte
 
 	PostgresConfig PostgresConfig `json:"mariaDBConfig"`
 	RedisConfig    RedisConfig    `json:"redisConfig"`
@@ -82,16 +85,19 @@ func Init(buildTime, buildVer string) {
 
 	conf.Environment = Environment(envString)
 
-	conf.TrustedService = map[string]bool{conf.ServiceID: true}
-	if trusted := os.Getenv("TRUSTED_SERVICES"); trusted == "" {
-		conf.TrustedService["STELLAR_HENTAI"] = true
+	if val, err := base64.StdEncoding.DecodeString(os.Getenv("DB_KEY")); err != nil {
+		log.Fatalf("%s failed to decode database key err: %+v", logTagConfig, err)
 	} else {
-		for _, svc := range strings.Split(trusted, ",") {
-			if _, ok := conf.TrustedService[svc]; !ok {
-				conf.TrustedService[svc] = true
-			}
-		}
+		conf.DBKey = val
 	}
+
+	if val, err := base64.StdEncoding.DecodeString(os.Getenv("HASH_KEY")); err != nil {
+		log.Fatalf("%s failed to decode hash key err: %+v", logTagConfig, err)
+	} else {
+		conf.HashKey = val
+	}
+
+	conf.TrustedService = map[string]bool{conf.ServiceID: true}
 
 	snowflake.SetMachineID(snowflake.PrivateIPToMachineID())
 	snowflake.SetStartTime(time.Date(2020, 8, 1, 0, 0, 0, 0, time.UTC))

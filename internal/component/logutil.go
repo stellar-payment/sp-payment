@@ -12,6 +12,8 @@ import (
 	"github.com/stellar-payment/sp-payment/internal/util/timeutil"
 )
 
+var globalLogger zerolog.Logger
+
 type NewLoggerParams struct {
 	PrettyPrint bool
 	ServiceName string
@@ -55,5 +57,10 @@ func NewLogger(params NewLoggerParams) zerolog.Logger {
 		output = zerolog.MultiLevelWriter(os.Stdout, runtimeLog)
 	}
 
-	return zerolog.New(output).With().Timestamp().Str("service", params.ServiceName).Logger().Hook(CallerNameHook())
+	globalLogger = zerolog.New(output).With().Timestamp().Str("service", params.ServiceName).Logger().Hook(CallerNameHook())
+	return globalLogger
+}
+
+func GetLogger() zerolog.Logger {
+	return globalLogger
 }

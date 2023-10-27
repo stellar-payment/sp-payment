@@ -46,7 +46,7 @@ func (pb *EventPubSub) Listen() {
 	for msg := range subscriber.Channel() {
 		switch msg.Channel {
 		case inconst.TOPIC_CREATE_CUSTOMER:
-			data := &indto.Customer{}
+			data := &indto.EventCustomer{}
 			if err := json.Unmarshal([]byte(msg.Payload), data); err != nil {
 				pb.logger.Warn().Err(err).Str("channel", msg.Channel).Msg("failed to marshal payload")
 				continue
@@ -57,7 +57,7 @@ func (pb *EventPubSub) Listen() {
 				continue
 			}
 		case inconst.TOPIC_DELETE_CUSTOMER:
-			data := &indto.Customer{}
+			data := &indto.EventCustomer{}
 			if err := json.Unmarshal([]byte(msg.Payload), data); err != nil {
 				pb.logger.Warn().Err(err).Str("channel", msg.Channel).Msg("failed to marshal payload")
 				continue
@@ -68,7 +68,7 @@ func (pb *EventPubSub) Listen() {
 				continue
 			}
 		case inconst.TOPIC_CREATE_MERCHANT:
-			data := &indto.Merchant{}
+			data := &indto.EventMerchant{}
 			if err := json.Unmarshal([]byte(msg.Payload), data); err != nil {
 				pb.logger.Warn().Err(err).Str("channel", msg.Channel).Msg("failed to marshal payload")
 				continue
@@ -79,7 +79,7 @@ func (pb *EventPubSub) Listen() {
 				continue
 			}
 		case inconst.TOPIC_DELETE_MERCHANT:
-			data := &indto.Merchant{}
+			data := &indto.EventMerchant{}
 			if err := json.Unmarshal([]byte(msg.Payload), data); err != nil {
 				pb.logger.Warn().Err(err).Str("channel", msg.Channel).Msg("failed to marshal payload")
 				continue

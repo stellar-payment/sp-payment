@@ -18,18 +18,18 @@ type Service interface {
 	// ----- Customers
 	GetAllCustomer(ctx context.Context, params *dto.CustomersQueryParams) (res *dto.ListCustomerResponse, err error)
 	GetCustomer(ctx context.Context, params *dto.CustomersQueryParams) (res *dto.CustomerResponse, err error)
-	HandleCreateCustomer(ctx context.Context, payload *indto.Customer) (err error)
+	HandleCreateCustomer(ctx context.Context, payload *indto.EventCustomer) (err error)
 	UpdateCustomer(ctx context.Context, params *dto.CustomersQueryParams, payload *dto.CustomerPayload) (err error)
 	DeleteCustomer(ctx context.Context, params *dto.CustomersQueryParams) (err error)
-	HandleDeleteCustomer(ctx context.Context, payload *indto.Customer) (err error)
+	HandleDeleteCustomer(ctx context.Context, payload *indto.EventCustomer) (err error)
 
 	// ----- Merchants
 	GetAllMerchant(ctx context.Context, params *dto.MerchantsQueryParams) (res *dto.ListMerchantResponse, err error)
 	GetMerchant(ctx context.Context, params *dto.MerchantsQueryParams) (res *dto.MerchantResponse, err error)
-	HandleCreateMerchant(ctx context.Context, payload *indto.Merchant) (err error)
+	HandleCreateMerchant(ctx context.Context, payload *indto.EventMerchant) (err error)
 	UpdateMerchant(ctx context.Context, params *dto.MerchantsQueryParams, payload *dto.MerchantPayload) (err error)
 	DeleteMerchant(ctx context.Context, params *dto.MerchantsQueryParams) (err error)
-	HandleDeleteMerchant(ctx context.Context, payload *indto.Merchant) (err error)
+	HandleDeleteMerchant(ctx context.Context, payload *indto.EventMerchant) (err error)
 }
 
 type service struct {

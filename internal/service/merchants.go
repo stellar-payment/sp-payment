@@ -6,9 +6,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
+	"github.com/stellar-payment/sp-payment/internal/component"
+	"github.com/stellar-payment/sp-payment/internal/config"
 	"github.com/stellar-payment/sp-payment/internal/inconst"
 	"github.com/stellar-payment/sp-payment/internal/indto"
 	"github.com/stellar-payment/sp-payment/internal/model"
+	"github.com/stellar-payment/sp-payment/internal/util/cryptoutil"
 	"github.com/stellar-payment/sp-payment/internal/util/scopeutil"
 	"github.com/stellar-payment/sp-payment/pkg/dto"
 	"github.com/stellar-payment/sp-payment/pkg/errs"
@@ -16,6 +19,7 @@ import (
 
 func (s *service) GetAllMerchant(ctx context.Context, params *dto.MerchantsQueryParams) (res *dto.ListMerchantResponse, err error) {
 	logger := log.Ctx(ctx)
+	conf := config.Get()
 
 	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN); !ok {
 		return nil, errs.ErrNoAccess
@@ -70,9 +74,9 @@ func (s *service) GetAllMerchant(ctx context.Context, params *dto.MerchantsQuery
 			Phone:        v.Phone,
 			Email:        v.Email,
 			Address:      v.Address,
-			PICName:      v.PICName,
-			PICEmail:     v.PICEmail,
-			PICPhone:     v.PICPhone,
+			PICName:      cryptoutil.DecryptField(v.PICName, conf.DBKey),
+			PICEmail:     cryptoutil.DecryptField(v.PICEmail, conf.DBKey),
+			PICPhone:     cryptoutil.DecryptField(v.PICPhone, conf.DBKey),
 			PhotoProfile: v.PhotoProfile,
 		}
 
@@ -84,6 +88,7 @@ func (s *service) GetAllMerchant(ctx context.Context, params *dto.MerchantsQuery
 
 func (s *service) GetMerchant(ctx context.Context, params *dto.MerchantsQueryParams) (res *dto.MerchantResponse, err error) {
 	logger := log.Ctx(ctx)
+	conf := config.Get()
 
 	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN); !ok {
 		return nil, errs.ErrNoAccess
@@ -106,18 +111,20 @@ func (s *service) GetMerchant(ctx context.Context, params *dto.MerchantsQueryPar
 		Phone:        data.Phone,
 		Email:        data.Email,
 		Address:      data.Address,
-		PICName:      data.PICName,
-		PICEmail:     data.PICEmail,
-		PICPhone:     data.PICPhone,
+		PICName:      cryptoutil.DecryptField(data.PICName, conf.DBKey),
+		PICEmail:     cryptoutil.DecryptField(data.PICEmail, conf.DBKey),
+		PICPhone:     cryptoutil.DecryptField(data.PICPhone, conf.DBKey),
 		PhotoProfile: data.PhotoProfile,
 	}
 
 	return
 }
 
-func (s *service) HandleCreateMerchant(ctx context.Context, payload *indto.Merchant) (err error) {
-	logger := log.Ctx(ctx)
+func (s *service) HandleCreateMerchant(ctx context.Context, payload *indto.EventMerchant) (err error) {
+	logger := component.GetLogger()
+	conf := config.Get()
 
+	rowHash := []byte{}
 	custModel := &model.Merchant{
 		ID:           uuid.NewString(),
 		UserID:       payload.UserID,
@@ -125,11 +132,13 @@ func (s *service) HandleCreateMerchant(ctx context.Context, payload *indto.Merch
 		Phone:        payload.Phone,
 		Email:        payload.Email,
 		Address:      payload.Address,
-		PICName:      payload.PICName,
-		PICEmail:     payload.PICEmail,
-		PICPhone:     payload.PICPhone,
+		PICName:      cryptoutil.EncryptField([]byte(payload.PICName), conf.DBKey, &rowHash),
+		PICEmail:     cryptoutil.EncryptField([]byte(payload.PICEmail), conf.DBKey, &rowHash),
+		PICPhone:     cryptoutil.EncryptField([]byte(payload.PICPhone), conf.DBKey, &rowHash),
 		PhotoProfile: payload.PhotoProfile,
 	}
+
+	custModel.RowHash = cryptoutil.HMACSHA512(rowHash, conf.HashKey)
 
 	if _, err = s.repository.CreateMerchant(ctx, custModel); err != nil {
 		logger.Error().Err(err).Send()
@@ -146,22 +155,27 @@ func (s *service) HandleCreateMerchant(ctx context.Context, payload *indto.Merch
 
 func (s *service) UpdateMerchant(ctx context.Context, params *dto.MerchantsQueryParams, payload *dto.MerchantPayload) (err error) {
 	logger := log.Ctx(ctx)
+	conf := config.Get()
 
 	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN); !ok {
 		return errs.ErrNoAccess
 	}
 
+	rowHash := []byte{}
 	custModel := &model.Merchant{
 		ID:           params.MerchantID,
 		Name:         payload.Name,
 		Phone:        payload.Phone,
 		Email:        payload.Email,
 		Address:      payload.Address,
-		PICName:      payload.PICName,
-		PICEmail:     payload.PICEmail,
-		PICPhone:     payload.PICPhone,
+		PICName:      cryptoutil.EncryptField([]byte(payload.PICName), conf.DBKey, &rowHash),
+		PICEmail:     cryptoutil.EncryptField([]byte(payload.PICEmail), conf.DBKey, &rowHash),
+		PICPhone:     cryptoutil.EncryptField([]byte(payload.PICPhone), conf.DBKey, &rowHash),
 		PhotoProfile: payload.PhotoProfile,
 	}
+
+	custModel.RowHash = cryptoutil.HMACSHA512(rowHash, conf.HashKey)
+
 	if err = s.repository.UpdateMerchant(ctx, custModel); err != nil {
 		logger.Error().Err(err).Send()
 		return
@@ -186,8 +200,8 @@ func (s *service) DeleteMerchant(ctx context.Context, params *dto.MerchantsQuery
 	return
 }
 
-func (s *service) HandleDeleteMerchant(ctx context.Context, params *indto.Merchant) (err error) {
-	logger := log.Ctx(ctx)
+func (s *service) HandleDeleteMerchant(ctx context.Context, params *indto.EventMerchant) (err error) {
+	logger := component.GetLogger()
 
 	err = s.repository.DeleteMerchant(ctx, &indto.MerchantParams{UserID: params.UserID})
 	if err != nil {

@@ -7,8 +7,9 @@ type Merchant struct {
 	Phone        string `db:"phone"`
 	Address      string `db:"address"`
 	Email        string `db:"email"`
-	PICName      string `db:"pic_name"`
-	PICEmail     string `db:"pic_email"`
-	PICPhone     string `db:"pic_phone"`
+	PICName      []byte `db:"pic_name"`
+	PICEmail     []byte `db:"pic_email"`
+	PICPhone     []byte `db:"pic_phone"`
 	PhotoProfile string `db:"photo_profile"`
+	RowHash      []byte `db:"row_hash"`
 }

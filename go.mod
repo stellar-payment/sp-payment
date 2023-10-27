@@ -13,6 +13,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/labstack/echo/v4 v4.9.0
 	github.com/rs/zerolog v1.29.1
+	github.com/zenazn/pkcs7pad v0.0.0-20170308005700-253a5b1f0e03
 	go.mongodb.org/mongo-driver v1.10.1
 	golang.org/x/time v0.3.0
 )

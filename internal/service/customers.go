@@ -6,9 +6,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
+	"github.com/stellar-payment/sp-payment/internal/component"
+	"github.com/stellar-payment/sp-payment/internal/config"
 	"github.com/stellar-payment/sp-payment/internal/inconst"
 	"github.com/stellar-payment/sp-payment/internal/indto"
 	"github.com/stellar-payment/sp-payment/internal/model"
+	"github.com/stellar-payment/sp-payment/internal/util/cryptoutil"
 	"github.com/stellar-payment/sp-payment/internal/util/scopeutil"
 	"github.com/stellar-payment/sp-payment/pkg/dto"
 	"github.com/stellar-payment/sp-payment/pkg/errs"
@@ -16,6 +19,7 @@ import (
 
 func (s *service) GetAllCustomer(ctx context.Context, params *dto.CustomersQueryParams) (res *dto.ListCustomerResponse, err error) {
 	logger := log.Ctx(ctx)
+	conf := config.Get()
 
 	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN); !ok {
 		return nil, errs.ErrNoAccess
@@ -66,11 +70,11 @@ func (s *service) GetAllCustomer(ctx context.Context, params *dto.CustomersQuery
 		temp := &dto.CustomerResponse{
 			ID:           v.ID,
 			UserID:       v.UserID,
-			LegalName:    v.LegalName,
-			Phone:        v.Phone,
-			Email:        v.Email,
-			Birthdate:    v.Birthdate,
-			Address:      v.Address,
+			LegalName:    cryptoutil.DecryptField(v.LegalName, conf.DBKey),
+			Phone:        cryptoutil.DecryptField(v.Phone, conf.DBKey),
+			Email:        cryptoutil.DecryptField(v.Email, conf.DBKey),
+			Birthdate:    cryptoutil.DecryptField(v.Birthdate, conf.DBKey),
+			Address:      cryptoutil.DecryptField(v.Address, conf.DBKey),
 			PhotoProfile: v.PhotoProfile,
 		}
 
@@ -82,6 +86,7 @@ func (s *service) GetAllCustomer(ctx context.Context, params *dto.CustomersQuery
 
 func (s *service) GetCustomer(ctx context.Context, params *dto.CustomersQueryParams) (res *dto.CustomerResponse, err error) {
 	logger := log.Ctx(ctx)
+	conf := config.Get()
 
 	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN); !ok {
 		return nil, errs.ErrNoAccess
@@ -100,30 +105,34 @@ func (s *service) GetCustomer(ctx context.Context, params *dto.CustomersQueryPar
 	res = &dto.CustomerResponse{
 		ID:           data.ID,
 		UserID:       data.UserID,
-		LegalName:    data.LegalName,
-		Phone:        data.Phone,
-		Email:        data.Email,
-		Birthdate:    data.Birthdate,
-		Address:      data.Address,
+		LegalName:    cryptoutil.DecryptField(data.LegalName, conf.DBKey),
+		Phone:        cryptoutil.DecryptField(data.Phone, conf.DBKey),
+		Email:        cryptoutil.DecryptField(data.Email, conf.DBKey),
+		Birthdate:    cryptoutil.DecryptField(data.Birthdate, conf.DBKey),
+		Address:      cryptoutil.DecryptField(data.Address, conf.DBKey),
 		PhotoProfile: data.PhotoProfile,
 	}
 
 	return
 }
 
-func (s *service) HandleCreateCustomer(ctx context.Context, payload *indto.Customer) (err error) {
-	logger := log.Ctx(ctx)
+func (s *service) HandleCreateCustomer(ctx context.Context, payload *indto.EventCustomer) (err error) {
+	logger := component.GetLogger()
+	conf := config.Get()
 
+	rowHash := []byte{}
 	custModel := &model.Customer{
 		ID:           uuid.NewString(),
 		UserID:       payload.UserID,
-		LegalName:    payload.LegalName,
-		Phone:        payload.Phone,
-		Email:        payload.Email,
-		Birthdate:    payload.Birthdate,
-		Address:      payload.Address,
+		LegalName:    cryptoutil.EncryptField([]byte(payload.LegalName), conf.DBKey, &rowHash),
+		Phone:        cryptoutil.EncryptField([]byte(payload.Phone), conf.DBKey, &rowHash),
+		Email:        cryptoutil.EncryptField([]byte(payload.Email), conf.DBKey, &rowHash),
+		Birthdate:    cryptoutil.EncryptField([]byte(payload.Birthdate), conf.DBKey, &rowHash),
+		Address:      cryptoutil.EncryptField([]byte(payload.Address), conf.DBKey, &rowHash),
 		PhotoProfile: payload.PhotoProfile,
 	}
+
+	custModel.RowHash = cryptoutil.HMACSHA512(rowHash, conf.HashKey)
 
 	if _, err = s.repository.CreateCustomer(ctx, custModel); err != nil {
 		logger.Error().Err(err).Send()
@@ -140,20 +149,24 @@ func (s *service) HandleCreateCustomer(ctx context.Context, payload *indto.Custo
 
 func (s *service) UpdateCustomer(ctx context.Context, params *dto.CustomersQueryParams, payload *dto.CustomerPayload) (err error) {
 	logger := log.Ctx(ctx)
+	conf := config.Get()
 
 	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN); !ok {
 		return errs.ErrNoAccess
 	}
 
+	rowHash := []byte{}
 	custModel := &model.Customer{
 		ID:           params.CustomerID,
-		LegalName:    payload.LegalName,
-		Phone:        payload.Phone,
-		Email:        payload.Email,
-		Birthdate:    payload.Birthdate,
-		Address:      payload.Address,
+		LegalName:    cryptoutil.EncryptField([]byte(payload.LegalName), conf.DBKey, &rowHash),
+		Phone:        cryptoutil.EncryptField([]byte(payload.Phone), conf.DBKey, &rowHash),
+		Email:        cryptoutil.EncryptField([]byte(payload.Email), conf.DBKey, &rowHash),
+		Birthdate:    cryptoutil.EncryptField([]byte(payload.Birthdate), conf.DBKey, &rowHash),
+		Address:      cryptoutil.EncryptField([]byte(payload.Address), conf.DBKey, &rowHash),
 		PhotoProfile: payload.PhotoProfile,
 	}
+
+	custModel.RowHash = cryptoutil.HMACSHA512(rowHash, conf.HashKey)
 	if err = s.repository.UpdateCustomer(ctx, custModel); err != nil {
 		logger.Error().Err(err).Send()
 		return
@@ -178,8 +191,8 @@ func (s *service) DeleteCustomer(ctx context.Context, params *dto.CustomersQuery
 	return
 }
 
-func (s *service) HandleDeleteCustomer(ctx context.Context, params *indto.Customer) (err error) {
-	logger := log.Ctx(ctx)
+func (s *service) HandleDeleteCustomer(ctx context.Context, params *indto.EventCustomer) (err error) {
+	logger := component.GetLogger()
 
 	err = s.repository.DeleteCustomer(ctx, &indto.CustomerParams{UserID: params.UserID})
 	if err != nil {

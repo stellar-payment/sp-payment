@@ -1,5 +1,7 @@
 package indto
 
+import "database/sql"
+
 type CustomerParams struct {
 	UserID     string
 	CustomerID string
@@ -9,12 +11,24 @@ type CustomerParams struct {
 }
 
 type Customer struct {
-	ID           string `db:"id" json:"id"`
-	UserID       string `db:"user_id" json:"user_id"`
-	LegalName    string `db:"legal_name" json:"legal_name"`
-	Phone        string `db:"phone" json:"phone"`
-	Email        string `db:"email" json:"email"`
-	Birthdate    string `db:"birthdate" json:"birth_date"`
-	Address      string `db:"address" json:"address"`
-	PhotoProfile string `db:"photo_profile" json:"photo_profile"`
+	ID           string       `db:"id"`
+	UserID       string       `db:"user_id"`
+	LegalName    []byte       `db:"legal_name"`
+	Phone        []byte       `db:"phone"`
+	Email        []byte       `db:"email"`
+	Birthdate    []byte       `db:"birthdate"`
+	Address      []byte       `db:"address"`
+	PhotoProfile string       `db:"photo_profile"`
+	RowHash      sql.NullByte `db:"row_hash"`
+}
+
+type EventCustomer struct {
+	ID           string `json:"id"`
+	UserID       string `json:"user_id"`
+	LegalName    string `json:"legal_name"`
+	Phone        string `json:"phone"`
+	Email        string `json:"email"`
+	Birthdate    string `json:"birth_date"`
+	Address      string `json:"address"`
+	PhotoProfile string `json:"photo_profile"`
 }
