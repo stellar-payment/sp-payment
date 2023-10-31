@@ -52,4 +52,16 @@ func Init(params *InitRouterParams) {
 	secureRouter.OPTIONS(merchantIDPath, handler.HandleUpdateMerchants(params.Service.UpdateMerchant))
 	secureRouter.DELETE(merchantIDPath, handler.HandleDeleteMerchant(params.Service.DeleteMerchant))
 	secureRouter.OPTIONS(merchantIDPath, handler.HandleDeleteMerchant(params.Service.DeleteMerchant))
+
+	// ----- Accounts
+	secureRouter.GET(accountBasepath, handler.HandleGetAccounts(params.Service.GetAllAccount))
+	secureRouter.OPTIONS(accountBasepath, handler.HandleGetAccounts(params.Service.GetAllAccount))
+	secureRouter.GET(accountIDPath, handler.HandleGetAccountByID(params.Service.GetAccount))
+	secureRouter.OPTIONS(accountIDPath, handler.HandleGetAccountByID(params.Service.GetAccount))
+	secureRouter.POST(accountBasepath, handler.HandleCreateAccount(params.Service.CreateAccount))
+	secureRouter.OPTIONS(accountBasepath, handler.HandleCreateAccount(params.Service.CreateAccount))
+	secureRouter.PUT(accountIDPath, handler.HandleUpdateAccounts(params.Service.UpdateAccount))
+	secureRouter.OPTIONS(accountIDPath, handler.HandleUpdateAccounts(params.Service.UpdateAccount))
+	secureRouter.DELETE(accountIDPath, handler.HandleDeleteAccount(params.Service.DeleteAccount))
+	secureRouter.OPTIONS(accountIDPath, handler.HandleDeleteAccount(params.Service.DeleteAccount))
 }

@@ -11,4 +11,8 @@ const (
 	// ----- Merchants
 	merchantBasepath = basePath + "/merchants"
 	merchantIDPath   = merchantBasepath + "/:merchantID"
+
+	// ----- Accounts
+	accountBasepath = basePath + "/accounts"
+	accountIDPath   = accountBasepath + "/:accountID"
 )

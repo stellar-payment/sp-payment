@@ -18,14 +18,20 @@ func (s *service) AuthorizedAccessCtx(ctx context.Context, token string) (res co
 	conf := config.Get()
 
 	requester := apiutil.NewRequester[indto.UserResponse]()
-	usrdata, err := requester.SendRequest(ctx, fmt.Sprintf("%s%s", conf.AuthServiceAddr, inconst.ACCOUNT_ME), http.MethodGet, map[string]string{
-		"authorization": fmt.Sprintf("Bearer %s", token),
-	}, nil)
+	apires, err := requester.SendRequest(ctx, &apiutil.SendRequestParams{
+		Endpoint: fmt.Sprintf("%s%s", conf.AuthServiceAddr, inconst.ACCOUNT_ME),
+		Method:   http.MethodGet,
+		Headers: map[string]string{
+			"authorization": fmt.Sprintf("Bearer %s", token),
+		},
+		Body: "",
+	})
 	if err != nil {
 		logger.Error().Err(err).Send()
 		return
 	}
 
-	res = ctxutil.WrapCtx(ctx, inconst.AUTH_CTX_KEY, usrdata)
+	res = ctxutil.WrapCtx(ctx, inconst.AUTH_CTX_KEY, apires.Payload)
+	res = ctxutil.WrapCtx(res, inconst.TOKEN_CTX_KEY, token)
 	return
 }

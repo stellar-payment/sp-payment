@@ -27,3 +27,9 @@ func GetCompanyIDCtx(ctx context.Context) (res int64) {
 
 	return
 }
+
+func GetTokenCtx(ctx context.Context) (res string) {
+	res, _ = GetCtx[string](ctx, inconst.TOKEN_CTX_KEY)
+
+	return
+}

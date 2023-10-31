@@ -1,14 +1,16 @@
 package apiutil
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"time"
 
-	"github.com/stellar-payment/sp-payment/internal/config"
+	"github.com/rs/zerolog"
+	"github.com/stellar-payment/sp-payment/internal/util/ctxutil"
 	"golang.org/x/time/rate"
 )
 
@@ -30,6 +32,24 @@ func (t *Transport) RoundTrip(r *http.Request) (*http.Response, error) {
 	}
 }
 
+type SendRequestParams struct {
+	Endpoint string
+	Method   string
+	Headers  map[string]string
+	Body     string
+}
+
+type APIResponse[T any] struct {
+	Status  int
+	Payload *T
+	Headers map[string][]string
+}
+
+type APIWrapper[T any] struct {
+	Data  *T  `json:"data"`
+	Error any `json:"error"`
+}
+
 // Actual API
 type Requester[T any] struct {
 	Client http.Client
@@ -44,35 +64,49 @@ func NewRequester[T any]() Requester[T] {
 	return t
 }
 
-func (r *Requester[T]) SendRequest(ctx context.Context, endpoint string, method string, header map[string]string, body io.Reader) (res *T, err error) {
-	req, err := http.NewRequestWithContext(ctx, method, endpoint, body)
+func (r *Requester[T]) SendRequest(ctx context.Context, params *SendRequestParams) (res *APIResponse[T], err error) {
+	logger := zerolog.Ctx(ctx)
+
+	req, err := http.NewRequestWithContext(ctx, params.Method, params.Endpoint, bytes.NewBuffer([]byte(params.Body)))
 	if err != nil {
 		return
 	}
 
-	conf := config.Get()
-	req.Header.Add("User-Agent", fmt.Sprintf("%s-%s", conf.ServiceName, conf.BuildVer))
-	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("User-Agent", "Stellar-Microservice by Misaki-chan")
 
-	for k, v := range header {
+	for k, v := range params.Headers {
 		req.Header.Add(k, v)
 	}
 
-	res = new(T)
+	if v := req.Header.Get("Authorization"); v == "" {
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", ctxutil.GetTokenCtx(ctx)))
+	}
+
 	data, err := r.Client.Do(req)
 	if err != nil {
 		return
 	}
 
-	defer data.Body.Close()
-	if data.StatusCode < 200 || data.StatusCode > 299 {
-		return nil, fmt.Errorf("failed to process request, got: %s", data.Status)
-	}
+	res = &APIResponse[T]{}
+	res.Headers = data.Header
+	res.Status = data.StatusCode
 
-	err = json.NewDecoder(data.Body).Decode(res)
-	if err != nil {
+	if data.StatusCode <= 200 && data.StatusCode >= 299 {
 		return
 	}
 
+	buf := &APIWrapper[T]{}
+
+	defer data.Body.Close()
+	defer logger.Info().Any("req-header", req.Header).Send()
+
+	rawBody, _ := ioutil.ReadAll(data.Body)
+	err = json.Unmarshal(rawBody, buf)
+	if err != nil {
+		logger.Error().Err(err).Str("raw", string(rawBody)).Send()
+		return nil, fmt.Errorf("failed to read response body")
+	}
+
+	res.Payload = buf.Data
 	return
 }
