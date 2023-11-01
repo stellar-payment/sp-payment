@@ -37,6 +37,15 @@ type Service interface {
 	CreateAccount(ctx context.Context, payload *dto.AccountPayload) (err error)
 	UpdateAccount(ctx context.Context, params *dto.AccountsQueryParams, payload *dto.AccountPayload) (err error)
 	DeleteAccount(ctx context.Context, params *dto.AccountsQueryParams) (err error)
+
+	// ----- Transactions
+	GetAllTransaction(ctx context.Context, params *dto.TransactionsQueryParams) (res *dto.ListTransactionResponse, err error)
+	GetTransaction(ctx context.Context, params *dto.TransactionsQueryParams) (res *dto.TransactionResponse, err error)
+	CreateTransactionP2P(ctx context.Context, payload *dto.TransactionPayload) (err error)
+	CreateTransactionP2B(ctx context.Context, payload *dto.TransactionPayload) (err error)
+	CreateTransactionSystem(ctx context.Context, payload *dto.TransactionPayload) (err error)
+	UpdateTransaction(ctx context.Context, params *dto.TransactionsQueryParams, payload *dto.TransactionPayload) (err error)
+	DeleteTransaction(ctx context.Context, params *dto.TransactionsQueryParams) (err error)
 }
 
 type service struct {

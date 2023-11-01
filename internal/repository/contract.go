@@ -35,6 +35,16 @@ type Repository interface {
 	CreateAccount(ctx context.Context, payload *model.Account) (res *model.Account, err error)
 	UpdateAccount(ctx context.Context, payload *model.Account) (err error)
 	DeleteAccount(ctx context.Context, params *indto.AccountParams) (err error)
+
+	// ----- Transactions
+	FindTransactions(ctx context.Context, params *indto.TransactionParams) (res []*indto.Transaction, err error)
+	CountTransactions(ctx context.Context, params *indto.TransactionParams) (res int64, err error)
+	FindTransaction(ctx context.Context, params *indto.TransactionParams) (res *indto.Transaction, err error)
+	CreateTransactionP2P(ctx context.Context, payload *model.Transaction) (err error)
+	CreateTransactionP2B(ctx context.Context, payload *model.Transaction) (err error)
+	CreateTransactionSystem(ctx context.Context, payload *model.Transaction) (err error)
+	UpdateTransaction(ctx context.Context, payload *model.Transaction) (err error)
+	DeleteTransaction(ctx context.Context, params *indto.TransactionParams) (err error)
 }
 
 type repository struct {

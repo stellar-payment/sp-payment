@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
+	"github.com/stellar-payment/sp-payment/internal/config"
 	"github.com/stellar-payment/sp-payment/internal/util/ctxutil"
 	"golang.org/x/time/rate"
 )
@@ -66,13 +67,14 @@ func NewRequester[T any]() Requester[T] {
 
 func (r *Requester[T]) SendRequest(ctx context.Context, params *SendRequestParams) (res *APIResponse[T], err error) {
 	logger := zerolog.Ctx(ctx)
+	conf := config.Get()
 
 	req, err := http.NewRequestWithContext(ctx, params.Method, params.Endpoint, bytes.NewBuffer([]byte(params.Body)))
 	if err != nil {
 		return
 	}
 
-	req.Header.Add("User-Agent", "Stellar-Microservice by Misaki-chan")
+	req.Header.Add("User-Agent", fmt.Sprintf("%s-%s %s", conf.ServiceID, conf.Environment, conf.BuildVer))
 
 	for k, v := range params.Headers {
 		req.Header.Add(k, v)
@@ -96,11 +98,10 @@ func (r *Requester[T]) SendRequest(ctx context.Context, params *SendRequestParam
 	}
 
 	buf := &APIWrapper[T]{}
+	rawBody, _ := ioutil.ReadAll(data.Body)
 
 	defer data.Body.Close()
-	defer logger.Info().Any("req-header", req.Header).Send()
 
-	rawBody, _ := ioutil.ReadAll(data.Body)
 	err = json.Unmarshal(rawBody, buf)
 	if err != nil {
 		logger.Error().Err(err).Str("raw", string(rawBody)).Send()
@@ -108,5 +109,14 @@ func (r *Requester[T]) SendRequest(ctx context.Context, params *SendRequestParam
 	}
 
 	res.Payload = buf.Data
+
+	logger.Info().
+		Str("url", params.Endpoint).
+		Any("req-header", req.Header).
+		Any("req-body", params.Body).
+		Any("res-header", data.Header).
+		Any("res-body", buf).
+		Send()
+
 	return
 }

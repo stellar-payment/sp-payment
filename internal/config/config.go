@@ -27,6 +27,8 @@ type Config struct {
 
 	AuthServiceAddr string
 
+	SystemAccountUUID string
+
 	DBKey   []byte
 	HashKey []byte
 
@@ -59,11 +61,12 @@ func Init(buildTime, buildVer string) {
 			Password:   os.Getenv("REDIS_PASSWORD"),
 			DefaultExp: 48 * time.Hour,
 		},
-		BuildVer:        buildVer,
-		BuildTime:       buildTime,
-		FilePath:        os.Getenv("FILE_PATH"),
-		FFJsonLogger:    os.Getenv("FF_OVERRIDE_JSON_LOGGER"),
-		AuthServiceAddr: os.Getenv("AUTH_SERVICE_ADDR"),
+		BuildVer:          buildVer,
+		BuildTime:         buildTime,
+		FilePath:          os.Getenv("FILE_PATH"),
+		FFJsonLogger:      os.Getenv("FF_OVERRIDE_JSON_LOGGER"),
+		AuthServiceAddr:   os.Getenv("AUTH_SERVICE_ADDR"),
+		SystemAccountUUID: os.Getenv("SYSTEM_ACCOUNT"),
 	}
 
 	if conf.ServiceName == "" {

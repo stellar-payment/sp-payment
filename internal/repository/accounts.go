@@ -93,8 +93,10 @@ func (r *repository) FindAccount(ctx context.Context, params *indto.AccountParam
 		cond = append(cond, squirrel.Eq{"id": params.AccountID})
 	} else if params.AccountNoHash != nil {
 		cond = append(cond, squirrel.Eq{"account_no_hash": params.AccountNoHash})
-	} else {
-		logger.Error().Msg("invalid args")
+	}
+
+	if params.UserID != "" {
+		cond = append(cond, squirrel.Eq{"owner_id": params.UserID})
 	}
 
 	stmt, args, err := pgSquirrel.Select("a.id", "a.owner_id", "a.account_type", "a.balance", "a.account_no", "row_hash").
@@ -146,6 +148,30 @@ func (r *repository) UpdateAccount(ctx context.Context, payload *model.Account) 
 		"pin":             squirrel.Expr("coalesce(nullif(?, ''), pin)", payload.PIN),
 		"row_hash":        payload.RowHash,
 		"updated_at":      time.Now(),
+	}).Where(squirrel.And{
+		squirrel.Eq{"id": payload.ID},
+		squirrel.Eq{"deleted_at": nil},
+	}).ToSql()
+	if err != nil {
+		logger.Error().Err(err).Msg("squirrel err")
+		return
+	}
+
+	_, err = r.db.ExecContext(ctx, stmt, args...)
+	if err != nil {
+		logger.Error().Err(err).Msg("sql err")
+		return
+	}
+
+	return
+}
+
+func (r *repository) updateAccountBalanceTx(ctx context.Context, tx *sql.Tx, payload *model.Account) (err error) {
+	logger := zerolog.Ctx(ctx)
+
+	stmt, args, err := pgSquirrel.Update("accounts").SetMap(map[string]interface{}{
+		"balance":    squirrel.Expr("(balance - ?)", payload.Balance),
+		"updated_at": time.Now(),
 	}).Where(squirrel.And{
 		squirrel.Eq{"id": payload.ID},
 		squirrel.Eq{"deleted_at": nil},

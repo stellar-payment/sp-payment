@@ -60,7 +60,7 @@ func RequestBodyLogger(logger *zerolog.Logger) echo.MiddlewareFunc {
 			conf := config.Get()
 
 			if conf.Environment == "prod" {
-				// for security purpose, exempt body logger from auth endpoints
+				// for security description, exempt body logger from auth endpoints
 				return strings.Contains(c.Request().URL.Path, "/auth")
 			}
 

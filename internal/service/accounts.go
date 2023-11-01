@@ -26,7 +26,7 @@ func (s *service) GetAllAccount(ctx context.Context, params *dto.AccountsQueryPa
 	logger := log.Ctx(ctx)
 	conf := config.Get()
 
-	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN, inconst.ROLE_CUSTOMER, inconst.ROLE_MERCHANT); !ok {
+	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN); !ok {
 		return nil, errs.ErrNoAccess
 	}
 
@@ -42,11 +42,6 @@ func (s *service) GetAllAccount(ctx context.Context, params *dto.AccountsQueryPa
 		Keyword: params.Keyword,
 		Limit:   params.Limit,
 		Page:    params.Page,
-	}
-
-	usrmeta := ctxutil.GetUserCTX(ctx)
-	if usrmeta.RoleID == inconst.ROLE_CUSTOMER || usrmeta.RoleID == inconst.ROLE_MERCHANT {
-		repoParams.UserID = usrmeta.UserID
 	}
 
 	res = &dto.ListAccountResponse{
@@ -80,7 +75,7 @@ func (s *service) GetAllAccount(ctx context.Context, params *dto.AccountsQueryPa
 		temp := &dto.AccountResponse{
 			ID:          v.ID,
 			OwnerID:     v.OwnerID,
-			AccountType: count,
+			AccountType: v.AccountType,
 			Balance:     v.Balance,
 			AccountNo:   cryptoutil.DecryptField(v.AccountNo, conf.DBKey),
 		}
@@ -162,12 +157,20 @@ func (s *service) CreateAccount(ctx context.Context, payload *dto.AccountPayload
 		return errs.New(errs.ErrMissingRequiredAttribute, val)
 	}
 
-	if exists, err := s.findUserByID(ctx, payload.OwnerID); err != nil {
+	usermeta, err := s.findUserByID(ctx, payload.OwnerID)
+	if err != nil {
 		logger.Error().Err(err).Send()
 		return err
-	} else if exists == nil {
+	} else if usermeta == nil {
 		logger.Error().Err(errs.ErrNotFound).Msgf("userID: %s not found", payload.OwnerID)
 		return errs.ErrBadRequest
+	}
+
+	if exist, err := s.repository.FindAccount(ctx, &indto.AccountParams{UserID: payload.OwnerID}); err != nil {
+		logger.Error().Err(err).Send()
+		return err
+	} else if exist != nil {
+		return errs.ErrDuplicatedResources
 	}
 
 	for {
@@ -192,11 +195,16 @@ func (s *service) CreateAccount(ctx context.Context, payload *dto.AccountPayload
 	accModel := &model.Account{
 		ID:            uuid.NewString(),
 		OwnerID:       payload.OwnerID,
-		AccountType:   payload.AccountType,
 		Balance:       0,
 		AccountNo:     cryptoutil.EncryptField([]byte(payload.AccountNo), conf.DBKey, &rowHash),
 		AccountNoHash: cryptoutil.HMACSHA512([]byte(payload.AccountNo), conf.HashKey),
 		RowHash:       rowHash,
+	}
+
+	if usermeta.RoleID == inconst.ROLE_CUSTOMER {
+		accModel.AccountType = inconst.ACCOUNT_TYPE_CUST
+	} else {
+		accModel.AccountType = inconst.ACCOUNT_TYPE_MERCHANT
 	}
 
 	if enc, err := bcrypt.GenerateFromPassword([]byte(payload.PIN), bcrypt.DefaultCost); err != nil {

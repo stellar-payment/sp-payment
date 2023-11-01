@@ -22,3 +22,17 @@ const (
 	ACCOUNT_TYPE_CUST     = 1
 	ACCOUNT_TYPE_MERCHANT = 2
 )
+
+const (
+	TRX_TYPE_P2P         = 1
+	TRX_TYPE_P2B         = 2
+	TRX_TYPE_BENEFICIARY = 3
+	TRX_TYPE_SYSTEM      = 9
+)
+
+const (
+	TRX_STATUS_PENDING   = 0
+	TRX_STATUS_SUCCESS   = 1
+	TRX_STATUS_CANCELLED = 2
+	TRX_STATUS_VOID      = 9
+)

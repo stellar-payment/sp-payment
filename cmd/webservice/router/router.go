@@ -64,4 +64,20 @@ func Init(params *InitRouterParams) {
 	secureRouter.OPTIONS(accountIDPath, handler.HandleUpdateAccounts(params.Service.UpdateAccount))
 	secureRouter.DELETE(accountIDPath, handler.HandleDeleteAccount(params.Service.DeleteAccount))
 	secureRouter.OPTIONS(accountIDPath, handler.HandleDeleteAccount(params.Service.DeleteAccount))
+
+	// ----- Transactions
+	secureRouter.GET(trxBasepath, handler.HandleGetTransactions(params.Service.GetAllTransaction))
+	secureRouter.OPTIONS(trxBasepath, handler.HandleGetTransactions(params.Service.GetAllTransaction))
+	secureRouter.GET(trxIDPath, handler.HandleGetTransactionByID(params.Service.GetTransaction))
+	secureRouter.OPTIONS(trxIDPath, handler.HandleGetTransactionByID(params.Service.GetTransaction))
+	secureRouter.POST(trxP2PPath, handler.HandleCreateTransaction(params.Service.CreateTransactionP2P))
+	secureRouter.OPTIONS(trxP2PPath, handler.HandleCreateTransaction(params.Service.CreateTransactionP2P))
+	secureRouter.POST(trxP2BPath, handler.HandleCreateTransaction(params.Service.CreateTransactionP2B))
+	secureRouter.OPTIONS(trxP2BPath, handler.HandleCreateTransaction(params.Service.CreateTransactionP2B))
+	secureRouter.POST(trxSYSPath, handler.HandleCreateTransaction(params.Service.CreateTransactionSystem))
+	secureRouter.OPTIONS(trxSYSPath, handler.HandleCreateTransaction(params.Service.CreateTransactionSystem))
+	secureRouter.PUT(trxIDPath, handler.HandleUpdateTransactions(params.Service.UpdateTransaction))
+	secureRouter.OPTIONS(trxIDPath, handler.HandleUpdateTransactions(params.Service.UpdateTransaction))
+	secureRouter.DELETE(trxIDPath, handler.HandleDeleteTransaction(params.Service.DeleteTransaction))
+	secureRouter.OPTIONS(trxIDPath, handler.HandleDeleteTransaction(params.Service.DeleteTransaction))
 }

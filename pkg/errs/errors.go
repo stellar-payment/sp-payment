@@ -22,6 +22,7 @@ var (
 	ErrUserDeactivated          = errors.New("user is deactivated")
 	ErrMissingRequiredAttribute = errors.New("attribute %s is missing")
 	ErrDataIntegrity            = errors.New("%s data integrity is compromised")
+	ErrInsufficientBalance      = errors.New("user does not have enough credit")
 )
 
 type CustomError struct {
@@ -51,7 +52,7 @@ func (e *CustomError) Is(err error) bool {
 
 // Errcode: AAA-BB-C
 // AAA => HTTP STATUS CODE
-// BB = 01 Basic, 02 Business Logic
+// BB = 01 Basic, 02+ Business Logic
 // C = ErrorID
 // Ex: 403021 = 403 (Forbidden) - Business Logic - ID 1
 const (
@@ -66,6 +67,7 @@ const (
 	ErrCodeTokenExpired             constant.ErrCode = 403021
 	ErrCodeUserExisted              constant.ErrCode = 400022
 	ErrCodeUserDeactivated          constant.ErrCode = 403023
+	ErrCodeInsufficientBalance      constant.ErrCode = 400024
 	ErrCodeDataIntegrity            constant.ErrCode = 500999
 )
 
@@ -90,7 +92,8 @@ var errorMap = map[error]dto.ErrorResponse{
 	ErrUserExisted:              ErrorResponse(ErrStatusClient, ErrCodeUserExisted, ErrDuplicatedResources),
 	ErrUserDeactivated:          ErrorResponse(ErrStatusNoAccess, ErrCodeUserDeactivated, ErrUserDeactivated),
 	ErrMissingRequiredAttribute: ErrorResponse(ErrStatusClient, ErrCodeMissingRequiredAttribute, ErrMissingRequiredAttribute),
-	ErrDataIntegrity: ErrorResponse(ErrStatusUnknown, ErrCodeDataIntegrity, ErrDataIntegrity),
+	ErrDataIntegrity:            ErrorResponse(ErrStatusUnknown, ErrCodeDataIntegrity, ErrDataIntegrity),
+	ErrInsufficientBalance:      ErrorResponse(ErrStatusClient, ErrCodeInsufficientBalance, ErrInsufficientBalance),
 }
 
 func ErrorResponse(status int, code constant.ErrCode, err error) dto.ErrorResponse {

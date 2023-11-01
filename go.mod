@@ -15,6 +15,7 @@ require (
 	github.com/rs/zerolog v1.29.1
 	github.com/zenazn/pkcs7pad v0.0.0-20170308005700-253a5b1f0e03
 	go.mongodb.org/mongo-driver v1.10.1
+	golang.org/x/crypto v0.13.0
 	golang.org/x/time v0.3.0
 )
 
@@ -47,7 +48,6 @@ require (
 	github.com/xdg-go/stringprep v1.0.3 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	go.uber.org/atomic v1.7.0 // indirect
-	golang.org/x/crypto v0.13.0 // indirect
 	golang.org/x/net v0.15.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect

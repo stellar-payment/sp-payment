@@ -25,6 +25,11 @@ func StringToInt64(s string) (res int64) {
 	return
 }
 
+func StringToUint64(s string) (res uint64) {
+	res, _ = strconv.ParseUint(s, 10, 64)
+	return
+}
+
 func StringToFloat32(s string) (res float32) {
 	x, _ := strconv.ParseFloat(s, 32)
 	return float32(x)

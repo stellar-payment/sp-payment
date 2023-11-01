@@ -15,4 +15,11 @@ const (
 	// ----- Accounts
 	accountBasepath = basePath + "/accounts"
 	accountIDPath   = accountBasepath + "/:accountID"
+
+	// ----- Transactions
+	trxBasepath = basePath + "/transactions"
+	trxIDPath   = trxBasepath + "/:trxID"
+	trxP2PPath  = trxBasepath + "/p2p"
+	trxP2BPath  = trxBasepath + "/p2b"
+	trxSYSPath  = trxBasepath + "/sys"
 )
