@@ -47,9 +47,10 @@ func Start(conf *config.Config, logger zerolog.Logger) {
 	})
 
 	psWorker := pubsub.NewEventPubSub(&pubsub.NewEventPubSubParams{
-		Logger:  logger,
-		Redis:   redis,
-		Service: service,
+		Logger:       logger,
+		Redis:        redis,
+		Service:      service,
+		SecureRoutes: []string{"transactions"},
 	})
 
 	router.Init(&router.InitRouterParams{

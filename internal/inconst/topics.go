@@ -1,6 +1,10 @@
 package inconst
 
 const (
+	// sp-gateway
+	TOPIC_BROADCAST_SECURE_ROUTE = "broadcast-secure-route"
+	TOPIC_REQUEST_SECURE_ROUTE   = "request-secure-route"
+
 	// sp-account
 	TOPIC_DELETE_USER = "delete-user"
 

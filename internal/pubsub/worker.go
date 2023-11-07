@@ -3,6 +3,8 @@ package pubsub
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"strings"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/rs/zerolog"
@@ -12,22 +14,25 @@ import (
 )
 
 type EventPubSub struct {
-	logger  zerolog.Logger
-	redis   *redis.Client
-	service service.Service
+	logger       zerolog.Logger
+	redis        *redis.Client
+	service      service.Service
+	secureRoutes []string
 }
 
 type NewEventPubSubParams struct {
-	Logger  zerolog.Logger
-	Redis   *redis.Client
-	Service service.Service
+	Logger       zerolog.Logger
+	Redis        *redis.Client
+	Service      service.Service
+	SecureRoutes []string
 }
 
 func NewEventPubSub(params *NewEventPubSubParams) *EventPubSub {
 	return &EventPubSub{
-		logger:  params.Logger,
-		redis:   params.Redis,
-		service: params.Service,
+		logger:       params.Logger,
+		redis:        params.Redis,
+		service:      params.Service,
+		secureRoutes: params.SecureRoutes,
 	}
 }
 
@@ -35,12 +40,16 @@ func (pb *EventPubSub) Listen() {
 	ctx := context.Background()
 
 	subscriber := pb.redis.Subscribe(ctx,
+		inconst.TOPIC_REQUEST_SECURE_ROUTE,
 		inconst.TOPIC_CREATE_CUSTOMER,
 		inconst.TOPIC_DELETE_CUSTOMER,
 		inconst.TOPIC_CREATE_MERCHANT,
 		inconst.TOPIC_DELETE_MERCHANT,
 		inconst.TOPIC_CREATE_TRX,
 	)
+
+	data := fmt.Sprintf("%s,%s", "payment", strings.Join(pb.secureRoutes, ","))
+	pb.redis.Publish(context.Background(), inconst.TOPIC_BROADCAST_SECURE_ROUTE, data)
 
 	defer subscriber.Close()
 	for msg := range subscriber.Channel() {
@@ -90,6 +99,9 @@ func (pb *EventPubSub) Listen() {
 				continue
 			}
 		case inconst.TOPIC_CREATE_TRX:
+		case inconst.TOPIC_REQUEST_SECURE_ROUTE:
+			data := fmt.Sprintf("%s,%s", "payment", strings.Join(pb.secureRoutes, ","))
+			pb.redis.Publish(context.Background(), inconst.TOPIC_BROADCAST_SECURE_ROUTE, data)
 		}
 	}
 }
