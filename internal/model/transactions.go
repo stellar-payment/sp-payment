@@ -6,6 +6,7 @@ type Transaction struct {
 	ID          uint64    `db:"id"`
 	AccountID   string    `db:"account_id"`
 	RecipientID string    `db:"recipient_id"`
+	MerchantID  string    `db:"-"`
 	TrxType     int64     `db:"trx_type"`
 	TrxDatetime time.Time `db:"trx_datetime"`
 	TrxStatus   int64     `db:"trx_status"`

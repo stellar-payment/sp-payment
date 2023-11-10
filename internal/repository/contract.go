@@ -45,6 +45,20 @@ type Repository interface {
 	CreateTransactionSystem(ctx context.Context, payload *model.Transaction) (err error)
 	UpdateTransaction(ctx context.Context, payload *model.Transaction) (err error)
 	DeleteTransaction(ctx context.Context, params *indto.TransactionParams) (err error)
+
+	// ----- Settlements
+	FindSettlements(ctx context.Context, params *indto.SettlementParams) (res []*indto.Settlement, err error)
+	CountSettlements(ctx context.Context, params *indto.SettlementParams) (res int64, err error)
+	FindSettlement(ctx context.Context, params *indto.SettlementParams) (res *indto.Settlement, err error)
+	FindPendingSettlement(ctx context.Context, params *indto.SettlementParams) (res float64, err error)
+
+	// ----- Beneficiaries
+	FindBeneficiaries(ctx context.Context, params *indto.BeneficiaryParams) (res []*indto.Beneficiary, err error)
+	CountBeneficiaries(ctx context.Context, params *indto.BeneficiaryParams) (res int64, err error)
+	FindBeneficiary(ctx context.Context, params *indto.BeneficiaryParams) (res *indto.Beneficiary, err error)
+	CreateBeneficiary(ctx context.Context, payload *model.Beneficiary) (res *model.Beneficiary, err error)
+	UpdateBeneficiary(ctx context.Context, payload *model.Beneficiary) (err error)
+	DeleteBeneficiary(ctx context.Context, params *indto.BeneficiaryParams) (err error)
 }
 
 type repository struct {

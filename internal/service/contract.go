@@ -46,6 +46,16 @@ type Service interface {
 	CreateTransactionSystem(ctx context.Context, payload *dto.TransactionPayload) (err error)
 	UpdateTransaction(ctx context.Context, params *dto.TransactionsQueryParams, payload *dto.TransactionPayload) (err error)
 	DeleteTransaction(ctx context.Context, params *dto.TransactionsQueryParams) (err error)
+
+	// ----- Settlements
+	GetAllSettlement(ctx context.Context, params *dto.SettlementsQueryParams) (res *dto.ListSettlementResponse, err error)
+	GetSettlement(ctx context.Context, params *dto.SettlementsQueryParams) (res *dto.SettlementResponse, err error)
+
+	// ----- Beneficiaries
+	GetAllBeneficiary(ctx context.Context, params *dto.BeneficiariesQueryParams) (res *dto.ListBeneficiaryResponse, err error)
+	GetBeneficiary(ctx context.Context, params *dto.BeneficiariesQueryParams) (res *dto.BeneficiaryResponse, err error)
+	GetBeneficiaryPreview(ctx context.Context, params *dto.BeneficiariesQueryParams) (res float64, err error)
+	CreateBeneficiary(ctx context.Context, params *dto.BeneficiariesQueryParams) (err error)
 }
 
 type service struct {

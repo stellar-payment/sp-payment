@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"math"
 	"time"
 
@@ -163,7 +162,6 @@ func (s *service) GetTransaction(ctx context.Context, params *dto.TransactionsQu
 			res.RecipientName = string(data.RecipientName)
 		}
 	}
-	fmt.Println(res)
 
 	return
 }
@@ -253,10 +251,10 @@ func (s *service) CreateTransactionSystem(ctx context.Context, payload *dto.Tran
 		logger.Error().Err(err).Send()
 		return err
 	} else if exists == nil {
-		logger.Error().Err(errs.ErrNotFound).Msgf("recepient accountID: %s not found", payload.AccountID)
+		logger.Error().Err(errs.ErrNotFound).Msgf("recepient accountID: %s not found", payload.RecipientID)
 		return errs.ErrBadRequest
 	} else if exists.AccountType != inconst.ACCOUNT_TYPE_CUST {
-		logger.Error().Err(errs.ErrNotFound).Msgf("recepient accountID: %s is not customer", payload.AccountID)
+		logger.Error().Err(errs.ErrNotFound).Msgf("recepient accountID: %s is not customer", payload.RecipientID)
 		return errs.ErrBadRequest
 	}
 
@@ -302,15 +300,26 @@ func (s *service) CreateTransactionP2B(ctx context.Context, payload *dto.Transac
 		return errs.ErrBadRequest
 	}
 
-	if exists, err := s.repository.FindAccount(ctx, &indto.AccountParams{AccountID: payload.RecipientID}); err != nil {
+	recipientMeta, err := s.repository.FindAccount(ctx, &indto.AccountParams{AccountID: payload.RecipientID})
+	if err != nil {
 		logger.Error().Err(err).Send()
 		return err
-	} else if exists == nil {
+	} else if recipientMeta == nil {
 		logger.Error().Err(errs.ErrNotFound).Msgf("recepient accountID: %s not found", payload.AccountID)
 		return errs.ErrBadRequest
-	} else if exists.AccountType != inconst.ACCOUNT_TYPE_MERCHANT {
+	} else if recipientMeta.AccountType != inconst.ACCOUNT_TYPE_MERCHANT {
 		logger.Error().Err(errs.ErrNotFound).Msgf("recepient accountID: %s is not merchant", payload.AccountID)
 		return errs.ErrBadRequest
+	}
+
+	merchantMeta, err := s.repository.FindMerchant(ctx, &indto.MerchantParams{UserID: recipientMeta.OwnerID})
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to fetch merchant meta")
+		return err
+	} else if merchantMeta == nil {
+		err = errs.New(errs.ErrNotFound)
+		logger.Error().Err(err).Str("user-id", recipientMeta.OwnerID).Msg("failed to fetch merchant meta")
+		return err
 	}
 
 	if senderMeta.Balance < payload.Nominal*1.1 {
@@ -323,9 +332,10 @@ func (s *service) CreateTransactionP2B(ctx context.Context, payload *dto.Transac
 		ID:          snowflake.ID(),
 		AccountID:   payload.AccountID,
 		RecipientID: payload.RecipientID,
+		MerchantID:  merchantMeta.ID,
 		TrxType:     inconst.TRX_TYPE_P2B,
 		TrxDatetime: time.Now(),
-		TrxStatus:   inconst.TRX_STATUS_PENDING, // always success
+		TrxStatus:   inconst.TRX_STATUS_SUCCESS,
 		TrxFee:      payload.Nominal * 0.1,
 		Nominal:     payload.Nominal,
 		Description: payload.Description,
@@ -336,11 +346,6 @@ func (s *service) CreateTransactionP2B(ctx context.Context, payload *dto.Transac
 		logger.Error().Err(err).Send()
 		return
 	}
-
-	// send publish event for setlements
-	// if err = s.publishEvent(ctx, inconst.TOPIC_DELETE_USER, nil); err != nil {
-	// 	logger.Error().Err(err).Send()
-	// }
 
 	return
 }

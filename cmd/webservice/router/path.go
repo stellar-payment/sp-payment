@@ -22,4 +22,13 @@ const (
 	trxP2PPath  = trxBasepath + "/p2p"
 	trxP2BPath  = trxBasepath + "/p2b"
 	trxSYSPath  = trxBasepath + "/sys"
+
+	// ----- Settlements
+	settlementBasepath = basePath + "/settlements"
+	settlementIDPath   = settlementBasepath + "/:settlementID"
+
+	// ----- Beneficiaries
+	beneficiaryBasepath    = basePath + "/beneficiaries"
+	beneficiaryIDPath      = beneficiaryBasepath + "/:beneficiaryID"
+	beneficiaryPreviewPath = beneficiaryBasepath + "/preview"
 )

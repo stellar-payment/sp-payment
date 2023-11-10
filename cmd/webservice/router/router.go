@@ -80,4 +80,20 @@ func Init(params *InitRouterParams) {
 	secureRouter.OPTIONS(trxIDPath, handler.HandleUpdateTransactions(params.Service.UpdateTransaction))
 	secureRouter.DELETE(trxIDPath, handler.HandleDeleteTransaction(params.Service.DeleteTransaction))
 	secureRouter.OPTIONS(trxIDPath, handler.HandleDeleteTransaction(params.Service.DeleteTransaction))
+
+	// ----- Settlements
+	secureRouter.GET(settlementBasepath, handler.HandleGetSettlements(params.Service.GetAllSettlement))
+	secureRouter.OPTIONS(settlementBasepath, handler.HandleGetSettlements(params.Service.GetAllSettlement))
+	secureRouter.GET(settlementIDPath, handler.HandleGetSettlementByID(params.Service.GetSettlement))
+	secureRouter.OPTIONS(settlementIDPath, handler.HandleGetSettlementByID(params.Service.GetSettlement))
+
+	// ----- Beneficiaries
+	secureRouter.GET(beneficiaryBasepath, handler.HandleGetBeneficiaries(params.Service.GetAllBeneficiary))
+	secureRouter.OPTIONS(beneficiaryBasepath, handler.HandleGetBeneficiaries(params.Service.GetAllBeneficiary))
+	secureRouter.GET(beneficiaryIDPath, handler.HandleGetBeneficiaryByID(params.Service.GetBeneficiary))
+	secureRouter.OPTIONS(beneficiaryIDPath, handler.HandleGetBeneficiaryByID(params.Service.GetBeneficiary))
+	secureRouter.GET(beneficiaryPreviewPath, handler.HandleGetBeneficiaryPreview(params.Service.GetBeneficiaryPreview))
+	secureRouter.OPTIONS(beneficiaryPreviewPath, handler.HandleGetBeneficiaryPreview(params.Service.GetBeneficiaryPreview))
+	secureRouter.POST(beneficiaryBasepath, handler.HandleCreateBeneficiary(params.Service.CreateBeneficiary))
+	secureRouter.OPTIONS(beneficiaryBasepath, handler.HandleCreateBeneficiary(params.Service.CreateBeneficiary))
 }

@@ -3,10 +3,10 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/godruoyi/go-snowflake"
 	"github.com/rs/zerolog"
 	"github.com/stellar-payment/sp-payment/internal/indto"
 	"github.com/stellar-payment/sp-payment/internal/model"
@@ -53,9 +53,6 @@ func (r *repository) FindTransactions(ctx context.Context, params *indto.Transac
 		logger.Error().Err(err).Msg("squirrel err")
 		return
 	}
-
-	fmt.Println(stmt)
-	fmt.Println(args)
 
 	rows, err := r.db.QueryxContext(ctx, stmt, args...)
 	if err != nil {
@@ -191,6 +188,7 @@ func (r *repository) CreateTransactionP2P(ctx context.Context, payload *model.Tr
 		logger.Error().Err(err).Msg("tx err")
 		return
 	}
+
 	return
 }
 
@@ -217,7 +215,13 @@ func (r *repository) CreateTransactionP2B(ctx context.Context, payload *model.Tr
 		logger.Error().Err(err).Send()
 		return
 	}
-
+	_, err = r.createSettlementTx(ctx, tx, &model.Settlement{
+		ID:             snowflake.ID(),
+		TransactionID:  payload.ID,
+		MerchantID:     payload.MerchantID,
+		Amount:         payload.Nominal,
+		SettlementDate: time.Now(),
+	})
 	if err = tx.Commit(); err != nil {
 		logger.Error().Err(err).Msg("tx err")
 		return

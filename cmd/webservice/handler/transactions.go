@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stellar-payment/sp-payment/internal/util/echttputil"
@@ -34,7 +33,6 @@ type GetTransactionByIDHandler func(context.Context, *dto.TransactionsQueryParam
 func HandleGetTransactionByID(handler GetTransactionByIDHandler) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		fmt.Println("F")
 		params := &dto.TransactionsQueryParams{}
 		if err := c.Bind(params); err != nil {
 			return echttputil.WriteErrorResponse(c, errs.ErrBrokenUserReq)
@@ -44,8 +42,6 @@ func HandleGetTransactionByID(handler GetTransactionByIDHandler) echo.HandlerFun
 		if err != nil {
 			return echttputil.WriteErrorResponse(c, err)
 		}
-
-		fmt.Println(res)
 
 		return echttputil.WriteSuccessResponse(c, res)
 	}
