@@ -80,11 +80,12 @@ func (r *repository) FindMerchant(ctx context.Context, params *indto.MerchantPar
 	cond := squirrel.And{
 		squirrel.Eq{"m.deleted_at": nil},
 	}
-
 	if params.MerchantID != "" {
-		cond = append(cond, squirrel.Eq{"m.id": params.MerchantID})
-	} else if params.UserID != "" {
-		cond = append(cond, squirrel.Eq{"m.user_id": params.UserID})
+		cond = append(cond, squirrel.Eq{"id": params.MerchantID})
+	}
+
+	if params.UserID != "" {
+		cond = append(cond, squirrel.Eq{"user_id": params.UserID})
 	}
 
 	stmt, args, err := pgSquirrel.Select("m.id", "m.user_id", "m.name", "m.address", "m.phone", "m.email", "m.pic_name", "m.pic_email", "m.pic_phone", "m.photo_profile", "m.row_hash").

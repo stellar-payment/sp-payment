@@ -78,8 +78,15 @@ func (r *repository) FindCustomer(ctx context.Context, params *indto.CustomerPar
 	logger := zerolog.Ctx(ctx)
 
 	cond := squirrel.And{
-		squirrel.Eq{"c.id": params.CustomerID},
 		squirrel.Eq{"c.deleted_at": nil},
+	}
+
+	if params.CustomerID != "" {
+		cond = append(cond, squirrel.Eq{"id": params.CustomerID})
+	}
+
+	if params.UserID != "" {
+		cond = append(cond, squirrel.Eq{"user_id": params.UserID})
 	}
 
 	stmt, args, err := pgSquirrel.Select("c.id", "c.user_id", "c.legal_name", "c.phone", "c.email", "c.birthdate", "c.address", "c.photo_profile", "c.row_hash").From("customers c").Where(cond).ToSql()
