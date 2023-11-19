@@ -13,7 +13,7 @@ type CustomerPayload struct {
 	Email        string `json:"email" validate:"required"`
 	Birthdate    string `json:"birth_date" validate:"required"`
 	Address      string `json:"address" validate:"required"`
-	PhotoProfile string `json:"photo_profile" validate:"required"`
+	PhotoProfile string `json:"photo_profile"`
 }
 
 type CustomerResponse struct {

@@ -15,7 +15,7 @@ type MerchantPayload struct {
 	PICName      string `json:"pic_name" validate:"required"`
 	PICEmail     string `json:"pic_email" validate:"required"`
 	PICPhone     string `json:"pic_phone" validate:"required"`
-	PhotoProfile string `json:"photo_profile" validate:"required"`
+	PhotoProfile string `json:"photo_profile"`
 }
 
 type MerchantResponse struct {
