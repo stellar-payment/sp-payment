@@ -12,6 +12,7 @@ import (
 	"github.com/stellar-payment/sp-payment/internal/indto"
 	"github.com/stellar-payment/sp-payment/internal/model"
 	"github.com/stellar-payment/sp-payment/internal/util/cryptoutil"
+	"github.com/stellar-payment/sp-payment/internal/util/ctxutil"
 	"github.com/stellar-payment/sp-payment/internal/util/scopeutil"
 	"github.com/stellar-payment/sp-payment/pkg/dto"
 	"github.com/stellar-payment/sp-payment/pkg/errs"
@@ -107,6 +108,57 @@ func (s *service) GetCustomer(ctx context.Context, params *dto.CustomersQueryPar
 	}
 
 	data, err := s.repository.FindCustomer(ctx, &indto.CustomerParams{CustomerID: params.CustomerID})
+	if err != nil {
+		logger.Error().Err(err).Send()
+		return
+	}
+
+	if data == nil {
+		return nil, errs.ErrNotFound
+	}
+
+	res = &dto.CustomerResponse{
+		ID:           data.ID,
+		UserID:       data.UserID,
+		LegalName:    cryptoutil.DecryptField(data.LegalName, conf.DBKey),
+		Phone:        cryptoutil.DecryptField(data.Phone, conf.DBKey),
+		Email:        cryptoutil.DecryptField(data.Email, conf.DBKey),
+		Birthdate:    cryptoutil.DecryptField(data.Birthdate, conf.DBKey),
+		Address:      cryptoutil.DecryptField(data.Address, conf.DBKey),
+		PhotoProfile: data.PhotoProfile,
+	}
+
+	hash := data.LegalName
+	hash = append(hash, data.Phone...)
+	hash = append(hash, data.Email...)
+	hash = append(hash, data.Birthdate...)
+	hash = append(hash, data.Address...)
+
+	if len(data.RowHash) != 0 {
+		if !cryptoutil.VerifyHMACSHA512(hash, conf.HashKey, data.RowHash) {
+			err = errs.New(errs.ErrDataIntegrity, "customer")
+			logger.Error().Err(err).Send()
+			return
+		}
+	} else {
+		err = errs.New(errs.ErrDataIntegrity, "customer")
+		logger.Error().Err(err).Str("customer-id", data.ID).Msg("row hash not found")
+		return
+	}
+
+	return
+}
+
+func (s *service) GetCustomerMe(ctx context.Context) (res *dto.CustomerResponse, err error) {
+	logger := log.Ctx(ctx)
+	conf := config.Get()
+
+	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN, inconst.ROLE_CUSTOMER); !ok {
+		return nil, errs.ErrNoAccess
+	}
+
+	usrmeta := ctxutil.GetUserCTX(ctx)
+	data, err := s.repository.FindCustomer(ctx, &indto.CustomerParams{UserID: usrmeta.UserID})
 	if err != nil {
 		logger.Error().Err(err).Send()
 		return

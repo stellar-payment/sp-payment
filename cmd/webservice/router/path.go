@@ -6,14 +6,17 @@ const (
 
 	// ----- Customers
 	customerBasepath = basePath + "/customers"
+	customerMePath   = customerBasepath + "/me"
 	customerIDPath   = customerBasepath + "/:customerID"
 
 	// ----- Merchants
 	merchantBasepath = basePath + "/merchants"
+	merchantMePath   = merchantBasepath + "/me"
 	merchantIDPath   = merchantBasepath + "/:merchantID"
 
 	// ----- Accounts
 	accountBasepath = basePath + "/accounts"
+	accountMePath   = accountBasepath + "/accounts/me"
 	accountIDPath   = accountBasepath + "/:accountID"
 
 	// ----- Transactions

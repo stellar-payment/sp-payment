@@ -45,6 +45,19 @@ func HandleGetMerchantByID(handler GetMerchantByIDHandler) echo.HandlerFunc {
 	}
 }
 
+type GetMerchantMeHandler func(context.Context) (*dto.MerchantResponse, error)
+
+func HandleGetMerchantMe(handler GetMerchantMeHandler) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		res, err := handler(c.Request().Context())
+		if err != nil {
+			return echttputil.WriteErrorResponse(c, err)
+		}
+
+		return echttputil.WriteSuccessResponse(c, res)
+	}
+}
+
 type CreateMerchantHandler func(context.Context, *dto.MerchantPayload) error
 
 func HandleCreateMerchants(handler CreateMerchantHandler) echo.HandlerFunc {

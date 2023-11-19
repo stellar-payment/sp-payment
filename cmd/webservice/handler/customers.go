@@ -45,6 +45,19 @@ func HandleGetCustomerByID(handler GetCustomerByIDHandler) echo.HandlerFunc {
 	}
 }
 
+type GetCustomerMeHandler func(context.Context) (*dto.CustomerResponse, error)
+
+func HandleGetCustomerMe(handler GetCustomerMeHandler) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		res, err := handler(c.Request().Context())
+		if err != nil {
+			return echttputil.WriteErrorResponse(c, err)
+		}
+
+		return echttputil.WriteSuccessResponse(c, res)
+	}
+}
+
 type CreateCustomerHandler func(context.Context, *dto.CustomerPayload) error
 
 func HandleCreateCustomers(handler CreateCustomerHandler) echo.HandlerFunc {

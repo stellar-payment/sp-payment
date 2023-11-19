@@ -45,6 +45,19 @@ func HandleGetAccountByID(handler GetAccountByIDHandler) echo.HandlerFunc {
 	}
 }
 
+type GetAccountMeHandler func(context.Context) (*dto.AccountResponse, error)
+
+func HandleGetAccountMe(handler GetAccountMeHandler) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		res, err := handler(c.Request().Context())
+		if err != nil {
+			return echttputil.WriteErrorResponse(c, err)
+		}
+
+		return echttputil.WriteSuccessResponse(c, res)
+	}
+}
+
 type CreateAccountHandler func(context.Context, *dto.AccountPayload) error
 
 func HandleCreateAccount(handler CreateAccountHandler) echo.HandlerFunc {

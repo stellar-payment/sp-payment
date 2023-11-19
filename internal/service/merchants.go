@@ -12,6 +12,7 @@ import (
 	"github.com/stellar-payment/sp-payment/internal/indto"
 	"github.com/stellar-payment/sp-payment/internal/model"
 	"github.com/stellar-payment/sp-payment/internal/util/cryptoutil"
+	"github.com/stellar-payment/sp-payment/internal/util/ctxutil"
 	"github.com/stellar-payment/sp-payment/internal/util/scopeutil"
 	"github.com/stellar-payment/sp-payment/pkg/dto"
 	"github.com/stellar-payment/sp-payment/pkg/errs"
@@ -107,6 +108,57 @@ func (s *service) GetMerchant(ctx context.Context, params *dto.MerchantsQueryPar
 	}
 
 	data, err := s.repository.FindMerchant(ctx, &indto.MerchantParams{MerchantID: params.MerchantID})
+	if err != nil {
+		logger.Error().Err(err).Send()
+		return
+	}
+
+	if data == nil {
+		return nil, errs.ErrNotFound
+	}
+
+	res = &dto.MerchantResponse{
+		ID:           data.ID,
+		UserID:       data.UserID,
+		Name:         data.Name,
+		Phone:        data.Phone,
+		Email:        data.Email,
+		Address:      data.Address,
+		PICName:      cryptoutil.DecryptField(data.PICName, conf.DBKey),
+		PICEmail:     cryptoutil.DecryptField(data.PICEmail, conf.DBKey),
+		PICPhone:     cryptoutil.DecryptField(data.PICPhone, conf.DBKey),
+		PhotoProfile: data.PhotoProfile,
+	}
+
+	hash := data.PICName
+	hash = append(hash, data.PICEmail...)
+	hash = append(hash, data.PICPhone...)
+
+	if len(data.RowHash) != 0 {
+		if !cryptoutil.VerifyHMACSHA512(hash, conf.HashKey, data.RowHash) {
+			err = errs.New(errs.ErrDataIntegrity, "merchant")
+			logger.Error().Err(err).Send()
+			return
+		}
+	} else {
+		err = errs.New(errs.ErrDataIntegrity, "merchant")
+		logger.Error().Err(err).Str("merchant-id", data.ID).Msg("row hash not found")
+		return
+	}
+
+	return
+}
+
+func (s *service) GetMerchantMe(ctx context.Context) (res *dto.MerchantResponse, err error) {
+	logger := log.Ctx(ctx)
+	conf := config.Get()
+
+	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN, inconst.ROLE_MERCHANT); !ok {
+		return nil, errs.ErrNoAccess
+	}
+
+	usrmeta := ctxutil.GetUserCTX(ctx)
+	data, err := s.repository.FindMerchant(ctx, &indto.MerchantParams{UserID: usrmeta.UserID})
 	if err != nil {
 		logger.Error().Err(err).Send()
 		return

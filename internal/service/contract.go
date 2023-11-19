@@ -18,6 +18,7 @@ type Service interface {
 	// ----- Customers
 	GetAllCustomer(ctx context.Context, params *dto.CustomersQueryParams) (res *dto.ListCustomerResponse, err error)
 	GetCustomer(ctx context.Context, params *dto.CustomersQueryParams) (res *dto.CustomerResponse, err error)
+	GetCustomerMe(ctx context.Context) (res *dto.CustomerResponse, err error)
 	HandleCreateCustomer(ctx context.Context, payload *indto.EventCustomer) (err error)
 	UpdateCustomer(ctx context.Context, params *dto.CustomersQueryParams, payload *dto.CustomerPayload) (err error)
 	DeleteCustomer(ctx context.Context, params *dto.CustomersQueryParams) (err error)
@@ -26,6 +27,7 @@ type Service interface {
 	// ----- Merchants
 	GetAllMerchant(ctx context.Context, params *dto.MerchantsQueryParams) (res *dto.ListMerchantResponse, err error)
 	GetMerchant(ctx context.Context, params *dto.MerchantsQueryParams) (res *dto.MerchantResponse, err error)
+	GetMerchantMe(ctx context.Context) (res *dto.MerchantResponse, err error)
 	HandleCreateMerchant(ctx context.Context, payload *indto.EventMerchant) (err error)
 	UpdateMerchant(ctx context.Context, params *dto.MerchantsQueryParams, payload *dto.MerchantPayload) (err error)
 	DeleteMerchant(ctx context.Context, params *dto.MerchantsQueryParams) (err error)
@@ -34,6 +36,7 @@ type Service interface {
 	// ----- Accounts
 	GetAllAccount(ctx context.Context, params *dto.AccountsQueryParams) (res *dto.ListAccountResponse, err error)
 	GetAccount(ctx context.Context, params *dto.AccountsQueryParams) (res *dto.AccountResponse, err error)
+	GetAccountMe(ctx context.Context) (res *dto.AccountResponse, err error)
 	CreateAccount(ctx context.Context, payload *dto.AccountPayload) (err error)
 	UpdateAccount(ctx context.Context, params *dto.AccountsQueryParams, payload *dto.AccountPayload) (err error)
 	DeleteAccount(ctx context.Context, params *dto.AccountsQueryParams) (err error)

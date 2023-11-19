@@ -26,7 +26,7 @@ func (s *service) GetAllAccount(ctx context.Context, params *dto.AccountsQueryPa
 	logger := log.Ctx(ctx)
 	conf := config.Get()
 
-	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN); !ok {
+	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN, inconst.ROLE_CUSTOMER); !ok {
 		return nil, errs.ErrNoAccess
 	}
 
@@ -104,6 +104,55 @@ func (s *service) GetAccount(ctx context.Context, params *dto.AccountsQueryParam
 	}
 
 	repoParams := &indto.AccountParams{AccountID: params.AccountID}
+
+	usrmeta := ctxutil.GetUserCTX(ctx)
+	if usrmeta.RoleID == inconst.ROLE_CUSTOMER || usrmeta.RoleID == inconst.ROLE_MERCHANT {
+		repoParams.UserID = usrmeta.UserID
+	}
+
+	data, err := s.repository.FindAccount(ctx, repoParams)
+	if err != nil {
+		logger.Error().Err(err).Send()
+		return
+	}
+
+	if data == nil {
+		return nil, errs.ErrNotFound
+	}
+
+	res = &dto.AccountResponse{
+		ID:          data.ID,
+		OwnerID:     data.OwnerID,
+		AccountType: data.AccountType,
+		Balance:     data.Balance,
+		AccountNo:   cryptoutil.DecryptField(data.AccountNo, conf.DBKey),
+	}
+
+	hash := data.AccountNo
+	if len(data.RowHash) != 0 {
+		if !cryptoutil.VerifyHMACSHA512(hash, conf.HashKey, data.RowHash) {
+			err = errs.New(errs.ErrDataIntegrity, "accounts")
+			logger.Error().Err(err).Send()
+			return
+		}
+	} else {
+		err = errs.New(errs.ErrDataIntegrity, "merchant")
+		logger.Error().Err(err).Str("merchant-id", data.ID).Msg("row hash not found")
+		return
+	}
+
+	return
+}
+
+func (s *service) GetAccountMe(ctx context.Context) (res *dto.AccountResponse, err error) {
+	logger := log.Ctx(ctx)
+	conf := config.Get()
+
+	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN, inconst.ROLE_CUSTOMER, inconst.ROLE_MERCHANT); !ok {
+		return nil, errs.ErrNoAccess
+	}
+
+	repoParams := &indto.AccountParams{}
 
 	usrmeta := ctxutil.GetUserCTX(ctx)
 	if usrmeta.RoleID == inconst.ROLE_CUSTOMER || usrmeta.RoleID == inconst.ROLE_MERCHANT {
