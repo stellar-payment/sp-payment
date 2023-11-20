@@ -27,8 +27,10 @@ func (r *repository) FindSettlements(ctx context.Context, params *indto.Settleme
 		cond = append(cond, squirrel.Eq{"s.beneficiary_id": params.BeneficiaryID})
 	}
 
-	baseStmt := pgSquirrel.Select("s.id", "s.transaction_id", "s.merchant_id", "s.beneficiary_id", "s.amount", "s.settlement_date").
-		From("settlements s").Where(cond)
+	baseStmt := pgSquirrel.Select("s.id", "s.transaction_id", "s.merchant_id", "m.name merchant_name", "s.beneficiary_id", "s.amount", "s.settlement_date").
+		From("settlements s").
+		LeftJoin("merchants m on s.merchant_id = m.id").
+		Where(cond)
 
 	if params.Limit != 0 && params.Page >= 1 {
 		baseStmt = baseStmt.Limit(params.Limit).Offset((params.Page - 1) * params.Limit)
@@ -106,8 +108,10 @@ func (r *repository) FindSettlement(ctx context.Context, params *indto.Settlemen
 		cond = append(cond, squirrel.Eq{"s.beneficiary_id": params.BeneficiaryID})
 	}
 
-	stmt, args, err := pgSquirrel.Select("s.id", "s.transaction_id", "s.merchant_id", "s.beneficiary_id", "s.amount", "s.settlement_date").
-		From("settlements s").Where(cond).ToSql()
+	stmt, args, err := pgSquirrel.Select("s.id", "s.transaction_id", "s.merchant_id", "m.name merchant_name", "s.beneficiary_id", "s.amount", "s.settlement_date").
+		From("settlements s").
+		LeftJoin("merchants m on m.id = s.merchant_name").
+		Where(cond).ToSql()
 	if err != nil {
 		logger.Error().Err(err).Msg("squirrel err")
 		return

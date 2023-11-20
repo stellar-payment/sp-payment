@@ -18,6 +18,7 @@ type AccountPayload struct {
 type AccountResponse struct {
 	ID          string  `json:"id"`
 	OwnerID     string  `json:"owner_id"`
+	OwnerName   string  `json:"owner_name"`
 	AccountType int64   `json:"account_type"`
 	Balance     float64 `json:"balance"`
 	AccountNo   string  `json:"account_no"`

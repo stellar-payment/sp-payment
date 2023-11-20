@@ -21,6 +21,7 @@ type SettlementResponse struct {
 	ID             uint64  `json:"id"`
 	TransactionID  uint64  `json:"transaction_id"`
 	MerchantID     string  `json:"merchant_id"`
+	MerchantName   string  `json:"merchant_name"`
 	BeneficiaryID  uint64  `json:"beneficiary_id"`
 	Amount         float64 `json:"amount"`
 	Status         int64   `json:"status"`

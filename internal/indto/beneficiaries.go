@@ -13,6 +13,7 @@ type BeneficiaryParams struct {
 type Beneficiary struct {
 	ID             uint64       `db:"id"`
 	MerchantID     string       `db:"merchant_id"`
+	MerchantName   string       `db:"merchant_name"`
 	Amount         string       `db:"amount"`
 	WithdrawalDate sql.NullTime `db:"withdrawal_date"`
 	Status         int64        `db:"status"`

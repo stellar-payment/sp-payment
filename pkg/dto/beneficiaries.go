@@ -18,6 +18,7 @@ type BeneficiaryPayload struct {
 type BeneficiaryResponse struct {
 	ID             uint64 `json:"id"`
 	MerchantID     string `json:"merchant_id"`
+	MerchantName   string `json:"merchant_name"`
 	Amount         string `json:"amount"`
 	WithdrawalDate string `json:"withdrawal_date"`
 	Status         int64  `json:"status"`

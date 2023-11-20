@@ -12,6 +12,7 @@ type AccountParams struct {
 type Account struct {
 	ID            string  `db:"id"`
 	OwnerID       string  `db:"owner_id"`
+	OwnerName     []byte  `db:"owner_name"`
 	AccountType   int64   `db:"account_type"`
 	Balance       float64 `db:"balance"`
 	AccountNo     []byte  `db:"account_no"`

@@ -2,6 +2,7 @@ package scopeutil
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/stellar-payment/sp-payment/internal/inconst"
 	"github.com/stellar-payment/sp-payment/internal/indto"
@@ -13,6 +14,8 @@ func ValidateScope(ctx context.Context, roles ...int64) (ok bool) {
 	if !ok {
 		return false
 	}
+
+	fmt.Println(userMeta)
 
 	if userMeta.RoleID == 0 {
 		return true

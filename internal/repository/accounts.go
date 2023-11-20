@@ -22,8 +22,11 @@ func (r *repository) FindAccounts(ctx context.Context, params *indto.AccountPara
 		cond = append(cond, squirrel.Eq{"a.owner_id": params.UserID})
 	}
 
-	baseStmt := pgSquirrel.Select("a.id", "a.owner_id", "a.account_type", "a.balance", "a.account_no", "row_hash").
-		From("accounts a").Where(cond)
+	baseStmt := pgSquirrel.Select("a.id", "a.owner_id", "coalesce(m.name, c.name) owner_name", "a.account_type", "a.balance", "a.account_no", "row_hash").
+		From("accounts a").
+		LeftJoin("merchants m on a.owner_id = m.user_id and a.account_type = 2").
+		LeftJoin("customers c on a.owner_id = c.user_id and a.account_type = 1").
+		Where(cond)
 
 	if params.Limit != 0 && params.Page >= 1 {
 		baseStmt = baseStmt.Limit(params.Limit).Offset((params.Page - 1) * params.Limit)
@@ -99,8 +102,11 @@ func (r *repository) FindAccount(ctx context.Context, params *indto.AccountParam
 		cond = append(cond, squirrel.Eq{"owner_id": params.UserID})
 	}
 
-	stmt, args, err := pgSquirrel.Select("a.id", "a.owner_id", "a.account_type", "a.balance", "a.account_no", "row_hash").
-		From("accounts a").Where(cond).ToSql()
+	stmt, args, err := pgSquirrel.Select("a.id", "a.owner_id", "coalesce(m.name, c.name) owner_name", "a.account_type", "a.balance", "a.account_no", "row_hash").
+		From("accounts a").
+		LeftJoin("merchants m on a.owner_id = m.user_id and a.account_type = 2").
+		LeftJoin("customers c on a.owner_id = c.user_id and a.account_type = 1").
+		Where(cond).ToSql()
 	if err != nil {
 		logger.Error().Err(err).Msg("squirrel err")
 		return

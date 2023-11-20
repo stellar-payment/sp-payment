@@ -82,10 +82,11 @@ func (s *service) GetAllBeneficiary(ctx context.Context, params *dto.Beneficiari
 
 	for _, v := range data {
 		temp := &dto.BeneficiaryResponse{
-			ID:         v.ID,
-			MerchantID: v.MerchantID,
-			Amount:     v.Amount,
-			Status:     v.Status,
+			ID:           v.ID,
+			MerchantID:   v.MerchantID,
+			MerchantName: v.MerchantName,
+			Amount:       v.Amount,
+			Status:       v.Status,
 		}
 
 		if v.WithdrawalDate.Valid {
@@ -135,6 +136,7 @@ func (s *service) GetBeneficiary(ctx context.Context, params *dto.BeneficiariesQ
 	res = &dto.BeneficiaryResponse{
 		ID:             data.ID,
 		MerchantID:     data.MerchantID,
+		MerchantName:   data.MerchantName,
 		Amount:         data.Amount,
 		WithdrawalDate: "",
 		Status:         data.Status,

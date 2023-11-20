@@ -23,8 +23,10 @@ func (r *repository) FindBeneficiaries(ctx context.Context, params *indto.Benefi
 		cond = append(cond, squirrel.Eq{"b.merchant_id": params.MerchantID})
 	}
 
-	baseStmt := pgSquirrel.Select("b.id", "b.merchant_id", "b.amount", "b.withdrawal_date", "b.status").
-		From("beneficiaries b").Where(cond)
+	baseStmt := pgSquirrel.Select("b.id", "b.merchant_id", "m.name merchant_name", "b.amount", "b.withdrawal_date", "b.status").
+		From("beneficiaries b").
+		LeftJoin("merchants m on m.id = b.merchant_id").
+		Where(cond)
 
 	if params.Limit != 0 && params.Page >= 1 {
 		baseStmt = baseStmt.Limit(params.Limit).Offset((params.Page - 1) * params.Limit)
@@ -91,8 +93,10 @@ func (r *repository) FindBeneficiary(ctx context.Context, params *indto.Benefici
 		squirrel.Eq{"b.id": params.BeneficiaryID},
 	}
 
-	stmt, args, err := pgSquirrel.Select("b.id", "b.merchant_id", "b.amount", "b.withdrawal_date", "b.status").
-		From("beneficiaries b").Where(cond).ToSql()
+	stmt, args, err := pgSquirrel.Select("b.id", "b.merchant_id", "m.name merchant_name", "b.amount", "b.withdrawal_date", "b.status").
+		From("beneficiaries b").
+		LeftJoin("merchants m on m.id = b.merchant_id").
+		Where(cond).ToSql()
 	if err != nil {
 		logger.Error().Err(err).Msg("squirrel err")
 		return

@@ -80,6 +80,14 @@ func (s *service) GetAllAccount(ctx context.Context, params *dto.AccountsQueryPa
 			AccountNo:   cryptoutil.DecryptField(v.AccountNo, conf.DBKey),
 		}
 
+		if v.OwnerName != nil {
+			if v.AccountType == inconst.ACCOUNT_TYPE_CUST {
+				temp.OwnerName = cryptoutil.DecryptField(v.OwnerName, conf.DBKey)
+			} else {
+				temp.OwnerName = string(v.OwnerName)
+			}
+		}
+
 		hash := v.AccountNo
 		if len(v.RowHash) != 0 {
 			if !cryptoutil.VerifyHMACSHA512(hash, conf.HashKey, v.RowHash) {
@@ -126,6 +134,14 @@ func (s *service) GetAccount(ctx context.Context, params *dto.AccountsQueryParam
 		AccountType: data.AccountType,
 		Balance:     data.Balance,
 		AccountNo:   cryptoutil.DecryptField(data.AccountNo, conf.DBKey),
+	}
+
+	if data.OwnerName != nil {
+		if data.AccountType == inconst.ACCOUNT_TYPE_CUST {
+			res.OwnerName = cryptoutil.DecryptField(data.OwnerName, conf.DBKey)
+		} else {
+			res.OwnerName = string(data.OwnerName)
+		}
 	}
 
 	hash := data.AccountNo
