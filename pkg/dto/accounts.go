@@ -1,10 +1,11 @@
 package dto
 
 type AccountsQueryParams struct {
-	AccountID string `param:"accountID"`
-	Keyword   string `query:"keyword"`
-	Limit     uint64 `query:"limit"`
-	Page      uint64 `query:"page"`
+	AccountID   string `param:"accountID"`
+	Keyword     string `query:"keyword"`
+	AccountType int64  `query:"accountType"`
+	Limit       uint64 `query:"limit"`
+	Page        uint64 `query:"page"`
 }
 
 type AccountPayload struct {
@@ -20,7 +21,7 @@ type AccountResponse struct {
 	OwnerID     string  `json:"owner_id"`
 	OwnerName   string  `json:"owner_name"`
 	AccountType int64   `json:"account_type"`
-	Balance     float64 `json:"balance"`
+	Balance     float64 `json:"balance,omitempty"`
 	AccountNo   string  `json:"account_no"`
 }
 

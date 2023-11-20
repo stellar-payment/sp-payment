@@ -22,6 +22,10 @@ func (r *repository) FindAccounts(ctx context.Context, params *indto.AccountPara
 		cond = append(cond, squirrel.Eq{"a.owner_id": params.UserID})
 	}
 
+	if params.AccountType != 0 {
+		cond = append(cond, squirrel.Eq{"a.account_type": params.AccountType})
+	}
+
 	baseStmt := pgSquirrel.Select("a.id", "a.owner_id", "coalesce(m.name::bytea, c.legal_name) owner_name", "a.account_type", "a.balance", "a.account_no", "a.row_hash").
 		From("accounts a").
 		LeftJoin("merchants m on a.owner_id = m.user_id and a.account_type = 2").
@@ -70,6 +74,10 @@ func (r *repository) CountAccounts(ctx context.Context, params *indto.AccountPar
 		cond = append(cond, squirrel.Eq{"a.owner_id": params.UserID})
 	}
 
+	if params.AccountType != 0 {
+		cond = append(cond, squirrel.Eq{"a.account_type": params.AccountType})
+	}
+
 	stmt, args, err := pgSquirrel.Select("count(*)").From("accounts a").Where(cond).ToSql()
 	if err != nil {
 		logger.Error().Err(err).Msg("squirrel err")
@@ -93,9 +101,9 @@ func (r *repository) FindAccount(ctx context.Context, params *indto.AccountParam
 	}
 
 	if params.AccountID != "" {
-		cond = append(cond, squirrel.Eq{"id": params.AccountID})
+		cond = append(cond, squirrel.Eq{"a.id": params.AccountID})
 	} else if params.AccountNoHash != nil {
-		cond = append(cond, squirrel.Eq{"account_no_hash": params.AccountNoHash})
+		cond = append(cond, squirrel.Eq{"a.account_no_hash": params.AccountNoHash})
 	}
 
 	if params.UserID != "" {

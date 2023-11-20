@@ -39,9 +39,10 @@ func (s *service) GetAllAccount(ctx context.Context, params *dto.AccountsQueryPa
 	}
 
 	repoParams := &indto.AccountParams{
-		Keyword: params.Keyword,
-		Limit:   params.Limit,
-		Page:    params.Page,
+		Keyword:     params.Keyword,
+		AccountType: params.AccountType,
+		Limit:       params.Limit,
+		Page:        params.Page,
 	}
 
 	res = &dto.ListAccountResponse{
@@ -76,7 +77,6 @@ func (s *service) GetAllAccount(ctx context.Context, params *dto.AccountsQueryPa
 			ID:          v.ID,
 			OwnerID:     v.OwnerID,
 			AccountType: v.AccountType,
-			Balance:     v.Balance,
 			AccountNo:   cryptoutil.DecryptField(v.AccountNo, conf.DBKey),
 		}
 

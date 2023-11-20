@@ -4,6 +4,7 @@ type AccountParams struct {
 	AccountID     string
 	UserID        string
 	AccountNoHash []byte
+	AccountType   int64
 	Keyword       string
 	Limit         uint64
 	Page          uint64
