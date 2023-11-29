@@ -41,7 +41,9 @@ const logTagConfig = "[Init Config]"
 var config *Config
 
 func Init(buildTime, buildVer string) {
-	godotenv.Load("conf/.env")
+	if err := godotenv.Load("conf/.env"); err != nil {
+		panic(err)
+	}
 
 	conf := Config{
 		ServiceName:    os.Getenv("SERVICE_NAME"),
