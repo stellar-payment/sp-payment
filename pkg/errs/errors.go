@@ -23,6 +23,7 @@ var (
 	ErrMissingRequiredAttribute = errors.New("attribute %s is missing")
 	ErrDataIntegrity            = errors.New("%s data integrity is compromised")
 	ErrInsufficientBalance      = errors.New("user does not have enough credit")
+	ErrUserSessionExpired       = errors.New("session expired")
 )
 
 type CustomError struct {
@@ -64,6 +65,7 @@ const (
 	ErrCodeBrokenUserReq            constant.ErrCode = 422016
 	ErrCodeNotFound                 constant.ErrCode = 404017
 	ErrCodeMissingRequiredAttribute constant.ErrCode = 400018
+	ErrCodeUserSessionExpired       constant.ErrCode = 403019
 	ErrCodeTokenExpired             constant.ErrCode = 403021
 	ErrCodeUserExisted              constant.ErrCode = 400022
 	ErrCodeUserDeactivated          constant.ErrCode = 403023
@@ -94,6 +96,7 @@ var errorMap = map[error]dto.ErrorResponse{
 	ErrMissingRequiredAttribute: ErrorResponse(ErrStatusClient, ErrCodeMissingRequiredAttribute, ErrMissingRequiredAttribute),
 	ErrDataIntegrity:            ErrorResponse(ErrStatusUnknown, ErrCodeDataIntegrity, ErrDataIntegrity),
 	ErrInsufficientBalance:      ErrorResponse(ErrStatusClient, ErrCodeInsufficientBalance, ErrInsufficientBalance),
+	ErrUserSessionExpired:       ErrorResponse(ErrStatusNoAccess, ErrCodeUserSessionExpired, ErrUserSessionExpired),
 }
 
 func ErrorResponse(status int, code constant.ErrCode, err error) dto.ErrorResponse {

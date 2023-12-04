@@ -37,7 +37,11 @@ func AuthorizationMiddleware(svc service.Service) echo.MiddlewareFunc {
 
 			ctx, err := svc.AuthorizedAccessCtx(c.Request().Context(), accessToken)
 			if err != nil {
-				return echttputil.WriteErrorResponse(c, errs.ErrNoAccess)
+				if err != errs.ErrUserSessionExpired {
+					err = errs.ErrNoAccess
+				}
+
+				return echttputil.WriteErrorResponse(c, err)
 			}
 
 			c.SetRequest(c.Request().Clone(ctx))

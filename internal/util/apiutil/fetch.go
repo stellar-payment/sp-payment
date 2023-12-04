@@ -12,6 +12,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stellar-payment/sp-payment/internal/config"
 	"github.com/stellar-payment/sp-payment/internal/util/ctxutil"
+	"github.com/stellar-payment/sp-payment/pkg/errs"
 	"golang.org/x/time/rate"
 )
 
@@ -46,9 +47,14 @@ type APIResponse[T any] struct {
 	Headers map[string][]string
 }
 
+type APIError struct {
+	Code int64  `json:"code"`
+	Msg  string `json:"msg"`
+}
+
 type APIWrapper[T any] struct {
-	Data  *T  `json:"data"`
-	Error any `json:"error"`
+	Data  *T       `json:"data"`
+	Error APIError `json:"error"`
 }
 
 // Actual API
@@ -93,10 +99,6 @@ func (r *Requester[T]) SendRequest(ctx context.Context, params *SendRequestParam
 	res.Headers = data.Header
 	res.Status = data.StatusCode
 
-	if data.StatusCode <= 200 && data.StatusCode >= 299 {
-		return
-	}
-
 	buf := &APIWrapper[T]{}
 	rawBody, _ := ioutil.ReadAll(data.Body)
 
@@ -108,10 +110,20 @@ func (r *Requester[T]) SendRequest(ctx context.Context, params *SendRequestParam
 		return nil, fmt.Errorf("failed to read response body")
 	}
 
+	if data.StatusCode <= 200 || data.StatusCode >= 299 {
+		if data.StatusCode == 403 {
+			logger.Info().Str("api-msg", buf.Error.Msg).Send()
+			return nil, errs.ErrUserSessionExpired
+		}
+
+		return nil, errs.ErrUnknown
+	}
+
 	res.Payload = buf.Data
 
 	logger.Info().
 		Str("url", params.Endpoint).
+		Str("status", data.Status).
 		Any("req-header", req.Header).
 		Any("req-body", params.Body).
 		Any("res-header", data.Header).
