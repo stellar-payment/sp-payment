@@ -110,7 +110,7 @@ func (r *Requester[T]) SendRequest(ctx context.Context, params *SendRequestParam
 		return nil, fmt.Errorf("failed to read response body")
 	}
 
-	if data.StatusCode <= 200 || data.StatusCode >= 299 {
+	if data.StatusCode < 200 || data.StatusCode > 299 {
 		logger.Info().Str("api-msg", buf.Error.Msg).Send()
 		if data.StatusCode == 403 {
 			return nil, errs.ErrUserSessionExpired
