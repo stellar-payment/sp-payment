@@ -2,6 +2,7 @@ package dto
 
 type AccountsQueryParams struct {
 	AccountID   string `param:"accountID"`
+	AccountNo   string `param:"accountNo"`
 	Keyword     string `query:"keyword"`
 	AccountType int64  `query:"accountType"`
 	Limit       uint64 `query:"limit"`

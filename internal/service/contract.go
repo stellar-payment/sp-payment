@@ -37,9 +37,12 @@ type Service interface {
 	GetAllAccount(ctx context.Context, params *dto.AccountsQueryParams) (res *dto.ListAccountResponse, err error)
 	GetAccount(ctx context.Context, params *dto.AccountsQueryParams) (res *dto.AccountResponse, err error)
 	GetAccountMe(ctx context.Context) (res *dto.AccountResponse, err error)
+	GetAccountByNo(ctx context.Context, params *dto.AccountsQueryParams) (res *dto.AccountResponse, err error)
 	CreateAccount(ctx context.Context, payload *dto.AccountPayload) (err error)
 	UpdateAccount(ctx context.Context, params *dto.AccountsQueryParams, payload *dto.AccountPayload) (err error)
 	DeleteAccount(ctx context.Context, params *dto.AccountsQueryParams) (err error)
+
+	AuthenticateAccountMe(ctx context.Context, payload *dto.AccountPayload) (err error)
 
 	// ----- Transactions
 	GetAllTransaction(ctx context.Context, params *dto.TransactionsQueryParams) (res *dto.ListTransactionResponse, err error)

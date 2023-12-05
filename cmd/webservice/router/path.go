@@ -15,9 +15,11 @@ const (
 	merchantIDPath   = merchantBasepath + "/:merchantID"
 
 	// ----- Accounts
-	accountBasepath = basePath + "/accounts"
-	accountMePath   = accountBasepath + "/me"
-	accountIDPath   = accountBasepath + "/:accountID"
+	accountBasepath     = basePath + "/accounts"
+	accountMePath       = accountBasepath + "/me"
+	accountIDPath       = accountBasepath + "/:accountID"
+	accountNoPath       = accountBasepath + "/no/:accountNo"
+	accountAuthenticate = accountBasepath + "/authenticate"
 
 	// ----- Transactions
 	trxBasepath = basePath + "/transactions"

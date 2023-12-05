@@ -110,7 +110,7 @@ func (r *repository) FindAccount(ctx context.Context, params *indto.AccountParam
 		cond = append(cond, squirrel.Eq{"owner_id": params.UserID})
 	}
 
-	stmt, args, err := pgSquirrel.Select("a.id", "a.owner_id", "coalesce(m.name::bytea, c.legal_name) owner_name", "a.account_type", "a.balance", "a.account_no", "a.row_hash").
+	stmt, args, err := pgSquirrel.Select("a.id", "a.owner_id", "coalesce(m.name::bytea, c.legal_name) owner_name", "a.account_type", "a.balance", "a.account_no", "a.pin", "a.row_hash").
 		From("accounts a").
 		LeftJoin("merchants m on a.owner_id = m.user_id and a.account_type = 2").
 		LeftJoin("customers c on a.owner_id = c.user_id and a.account_type = 1").

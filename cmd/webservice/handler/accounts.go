@@ -45,6 +45,24 @@ func HandleGetAccountByID(handler GetAccountByIDHandler) echo.HandlerFunc {
 	}
 }
 
+type GetAccountByAccountNoHandler func(context.Context, *dto.AccountsQueryParams) (*dto.AccountResponse, error)
+
+func HandleGetAccountByAccountNo(handler GetAccountByAccountNoHandler) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		params := &dto.AccountsQueryParams{}
+		if err := c.Bind(params); err != nil {
+			return echttputil.WriteErrorResponse(c, errs.ErrBrokenUserReq)
+		}
+
+		res, err := handler(c.Request().Context(), params)
+		if err != nil {
+			return echttputil.WriteErrorResponse(c, err)
+		}
+
+		return echttputil.WriteSuccessResponse(c, res)
+	}
+}
+
 type GetAccountMeHandler func(context.Context) (*dto.AccountResponse, error)
 
 func HandleGetAccountMe(handler GetAccountMeHandler) echo.HandlerFunc {
@@ -108,6 +126,24 @@ func HandleDeleteAccount(handler DeleteAccountHandler) echo.HandlerFunc {
 		}
 
 		err := handler(c.Request().Context(), params)
+		if err != nil {
+			return echttputil.WriteErrorResponse(c, err)
+		}
+
+		return echttputil.WriteSuccessResponse(c, nil)
+	}
+}
+
+type AuthenticateAccountMeHandler func(context.Context, *dto.AccountPayload) error
+
+func HandleAuthenticateAccountMe(handler AuthenticateAccountMeHandler) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		payload := &dto.AccountPayload{}
+		if err := c.Bind(payload); err != nil {
+			return echttputil.WriteErrorResponse(c, errs.ErrBrokenUserReq)
+		}
+
+		err := handler(c.Request().Context(), payload)
 		if err != nil {
 			return echttputil.WriteErrorResponse(c, err)
 		}

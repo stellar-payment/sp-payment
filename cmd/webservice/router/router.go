@@ -71,6 +71,12 @@ func Init(params *InitRouterParams) {
 	secureRouter.DELETE(accountIDPath, handler.HandleDeleteAccount(params.Service.DeleteAccount))
 	secureRouter.OPTIONS(accountIDPath, handler.HandleDeleteAccount(params.Service.DeleteAccount))
 
+	// ----- Accounts (Transactional)
+	secureRouter.GET(accountNoPath, handler.HandleGetAccountByAccountNo(params.Service.GetAccountByNo))
+	secureRouter.OPTIONS(accountNoPath, handler.HandleGetAccountByAccountNo(params.Service.GetAccountByNo))
+	secureRouter.POST(accountAuthenticate, handler.HandleAuthenticateAccountMe(params.Service.AuthenticateAccountMe))
+	secureRouter.OPTIONS(accountAuthenticate, handler.HandleAuthenticateAccountMe(params.Service.AuthenticateAccountMe))
+
 	// ----- Transactions
 	secureRouter.GET(trxBasepath, handler.HandleGetTransactions(params.Service.GetAllTransaction))
 	secureRouter.OPTIONS(trxBasepath, handler.HandleGetTransactions(params.Service.GetAllTransaction))

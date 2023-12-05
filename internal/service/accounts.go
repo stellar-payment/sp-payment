@@ -160,6 +160,63 @@ func (s *service) GetAccount(ctx context.Context, params *dto.AccountsQueryParam
 	return
 }
 
+func (s *service) GetAccountByNo(ctx context.Context, params *dto.AccountsQueryParams) (res *dto.AccountResponse, err error) {
+	logger := log.Ctx(ctx)
+	conf := config.Get()
+
+	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN, inconst.ROLE_CUSTOMER, inconst.ROLE_MERCHANT); !ok {
+		return nil, errs.ErrNoAccess
+	}
+
+	repoParams := &indto.AccountParams{AccountNoHash: cryptoutil.HMACSHA512([]byte(params.AccountNo), conf.HashKey)}
+
+	usrmeta := ctxutil.GetUserCTX(ctx)
+	if usrmeta.RoleID == inconst.ROLE_CUSTOMER || usrmeta.RoleID == inconst.ROLE_MERCHANT {
+		repoParams.UserID = usrmeta.UserID
+	}
+
+	data, err := s.repository.FindAccount(ctx, repoParams)
+	if err != nil {
+		logger.Error().Err(err).Send()
+		return
+	}
+
+	if data == nil {
+		return nil, errs.ErrNotFound
+	}
+
+	res = &dto.AccountResponse{
+		ID:          data.ID,
+		OwnerID:     data.OwnerID,
+		AccountType: data.AccountType,
+		Balance:     data.Balance,
+		AccountNo:   cryptoutil.DecryptField(data.AccountNo, conf.DBKey),
+	}
+
+	if data.OwnerName != nil {
+		if data.AccountType == inconst.ACCOUNT_TYPE_CUST {
+			res.OwnerName = cryptoutil.DecryptField(data.OwnerName, conf.DBKey)
+		} else {
+			res.OwnerName = string(data.OwnerName)
+		}
+	}
+
+	hash := data.AccountNo
+	if len(data.RowHash) != 0 {
+		if !cryptoutil.VerifyHMACSHA512(hash, conf.HashKey, data.RowHash) {
+			err = errs.New(errs.ErrDataIntegrity, "accounts")
+			logger.Error().Err(err).Send()
+			return
+		}
+	} else {
+		err = errs.New(errs.ErrDataIntegrity, "merchant")
+		logger.Error().Err(err).Str("merchant-id", data.ID).Msg("row hash not found")
+		return
+	}
+
+	return
+}
+
 func (s *service) GetAccountMe(ctx context.Context) (res *dto.AccountResponse, err error) {
 	logger := log.Ctx(ctx)
 	conf := config.Get()
@@ -358,6 +415,37 @@ func (s *service) DeleteAccount(ctx context.Context, params *dto.AccountsQueryPa
 	if err != nil {
 		logger.Error().Err(err).Send()
 		return
+	}
+
+	return
+}
+
+func (s *service) AuthenticateAccountMe(ctx context.Context, payload *dto.AccountPayload) (err error) {
+	logger := log.Ctx(ctx)
+	conf := config.Get()
+
+	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_CUSTOMER, inconst.ROLE_MERCHANT); !ok {
+		return errs.ErrNoAccess
+	}
+
+	usrmeta := ctxutil.GetUserCTX(ctx)
+	repoParams := &indto.AccountParams{UserID: usrmeta.UserID}
+
+	data, err := s.repository.FindAccount(ctx, repoParams)
+	if err != nil {
+		logger.Error().Err(err).Send()
+		return
+	}
+
+	if data == nil || cryptoutil.VerifyHMACSHA512([]byte(payload.AccountNo), conf.HashKey, []byte(data.AccountNo)) {
+		logger.Error().Str("reason", "no data found").Msg("failed to authenticate PIN")
+		return errs.ErrNoAccess
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(data.PIN), []byte(payload.PIN))
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to authenticate PIN")
+		return errs.ErrNoAccess
 	}
 
 	return
