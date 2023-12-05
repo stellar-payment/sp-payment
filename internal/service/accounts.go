@@ -170,11 +170,6 @@ func (s *service) GetAccountByNo(ctx context.Context, params *dto.AccountsQueryP
 
 	repoParams := &indto.AccountParams{AccountNoHash: cryptoutil.HMACSHA512([]byte(params.AccountNo), conf.HashKey)}
 
-	usrmeta := ctxutil.GetUserCTX(ctx)
-	if usrmeta.RoleID == inconst.ROLE_CUSTOMER || usrmeta.RoleID == inconst.ROLE_MERCHANT {
-		repoParams.UserID = usrmeta.UserID
-	}
-
 	data, err := s.repository.FindAccount(ctx, repoParams)
 	if err != nil {
 		logger.Error().Err(err).Send()
@@ -189,7 +184,6 @@ func (s *service) GetAccountByNo(ctx context.Context, params *dto.AccountsQueryP
 		ID:          data.ID,
 		OwnerID:     data.OwnerID,
 		AccountType: data.AccountType,
-		Balance:     data.Balance,
 		AccountNo:   cryptoutil.DecryptField(data.AccountNo, conf.DBKey),
 	}
 
