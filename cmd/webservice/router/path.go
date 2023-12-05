@@ -16,7 +16,7 @@ const (
 
 	// ----- Accounts
 	accountBasepath = basePath + "/accounts"
-	accountMePath   = accountBasepath + "/accounts/me"
+	accountMePath   = accountBasepath + "/me"
 	accountIDPath   = accountBasepath + "/:accountID"
 
 	// ----- Transactions
