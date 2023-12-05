@@ -3,7 +3,8 @@ package inconst
 type CtxKey string
 
 const (
-	REQID_HEADER = "X-Request-Id"
+	REQID_HEADER     = "X-Request-Id"
+	CORRREQID_HEADER = "X-Correlation-Id"
 )
 
 const (

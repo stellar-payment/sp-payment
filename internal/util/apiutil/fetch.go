@@ -111,8 +111,8 @@ func (r *Requester[T]) SendRequest(ctx context.Context, params *SendRequestParam
 	}
 
 	if data.StatusCode <= 200 || data.StatusCode >= 299 {
+		logger.Info().Str("api-msg", buf.Error.Msg).Send()
 		if data.StatusCode == 403 {
-			logger.Info().Str("api-msg", buf.Error.Msg).Send()
 			return nil, errs.ErrUserSessionExpired
 		}
 

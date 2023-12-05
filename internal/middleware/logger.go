@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
 	"github.com/stellar-payment/sp-payment/internal/config"
+	"github.com/stellar-payment/sp-payment/internal/inconst"
 )
 
 func HandlerLogger(logger *zerolog.Logger) echo.MiddlewareFunc {
@@ -16,7 +17,9 @@ func HandlerLogger(logger *zerolog.Logger) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			l := logger.With().Logger()
 			l.UpdateContext(func(cl zerolog.Context) zerolog.Context {
-				return cl.Str("request-id", c.Response().Header().Get(echo.HeaderXRequestID))
+				return cl.
+					Str("request-id", c.Response().Header().Get(echo.HeaderXRequestID)).
+					Str("correlation-id", c.Response().Header().Get(inconst.CORRREQID_HEADER))
 			})
 
 			c.SetRequest(c.Request().WithContext(l.WithContext(c.Request().Context())))
@@ -31,6 +34,7 @@ func RequestLogger(logger *zerolog.Logger) echo.MiddlewareFunc {
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
 			logger.Info().
 				Str("request-id", c.Response().Header().Get(echo.HeaderXRequestID)).
+				Str("correlation-id", c.Response().Header().Get(inconst.CORRREQID_HEADER)).
 				Str("latency", v.Latency.String()).
 				Str("protocol", v.Protocol).
 				Str("remoteIP", v.RemoteIP).
@@ -70,7 +74,9 @@ func RequestBodyLogger(logger *zerolog.Logger) echo.MiddlewareFunc {
 		Handler: func(c echo.Context, in []byte, out []byte) {
 			loggerInfo := logger.Info()
 
-			loggerInfo = loggerInfo.Str("request-id", c.Response().Header().Get(echo.HeaderXRequestID)).
+			loggerInfo = loggerInfo.
+				Str("request-id", c.Response().Header().Get(echo.HeaderXRequestID)).
+				Str("correlation-id", c.Response().Header().Get(inconst.CORRREQID_HEADER)).
 				Any("request-header", c.Request().Header)
 			if string(in) != "" {
 				compactJson := &bytes.Buffer{}
