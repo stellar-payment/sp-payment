@@ -34,3 +34,25 @@ func (s *service) findUserByID(ctx context.Context, id string) (res *indto.User,
 
 	return apires.Payload, nil
 }
+
+func (s *service) findUserMe(ctx context.Context) (res *indto.User, err error) {
+	logger := zerolog.Ctx(ctx)
+	invoker := apiutil.NewRequester[indto.User]()
+	conf := config.Get()
+
+	apires, err := invoker.SendRequest(ctx, &apiutil.SendRequestParams{
+		Endpoint: fmt.Sprintf("%s%s", conf.AuthServiceAddr, inconst.ACCOUNT_ME),
+		Method:   http.MethodGet,
+		Headers: map[string]string{
+			"authorization": fmt.Sprintf("Bearer %s", ctxutil.GetTokenCtx(ctx)),
+		},
+		Body: "",
+	})
+
+	if err != nil {
+		logger.Error().Err(err).Send()
+		return
+	}
+
+	return apires.Payload, nil
+}

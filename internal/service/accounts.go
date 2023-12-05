@@ -213,6 +213,8 @@ func (s *service) CreateAccount(ctx context.Context, payload *dto.AccountPayload
 	logger := component.GetLogger()
 	conf := config.Get()
 
+	usrctx := ctxutil.GetUserCTX(ctx)
+
 	if ok := scopeutil.ValidateScope(ctx, inconst.ROLE_ADMIN, inconst.ROLE_CUSTOMER, inconst.ROLE_MERCHANT); !ok {
 		return errs.ErrNoAccess
 	}
@@ -222,7 +224,14 @@ func (s *service) CreateAccount(ctx context.Context, payload *dto.AccountPayload
 		return errs.New(errs.ErrMissingRequiredAttribute, val)
 	}
 
-	usermeta, err := s.findUserByID(ctx, payload.OwnerID)
+	var usermeta *indto.User
+
+	if usrctx.RoleID <= inconst.ROLE_ADMIN {
+		usermeta, err = s.findUserByID(ctx, payload.OwnerID)
+	} else {
+		usermeta, err = s.findUserMe(ctx)
+	}
+
 	if err != nil {
 		logger.Error().Err(err).Send()
 		return err
