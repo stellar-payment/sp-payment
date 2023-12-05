@@ -82,6 +82,7 @@ func RequestBodyLogger(logger *zerolog.Logger) echo.MiddlewareFunc {
 				compactJson := &bytes.Buffer{}
 				if err := json.Compact(compactJson, in); err != nil {
 					logger.Warn().Err(err).Msg("failed to minify json req")
+					loggerInfo = loggerInfo.Any("request-body(raw)", in)
 				} else {
 					loggerInfo = loggerInfo.RawJSON("request-body", compactJson.Bytes())
 				}
