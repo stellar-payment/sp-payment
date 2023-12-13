@@ -217,6 +217,12 @@ func (s *service) CreateTransactionP2P(ctx context.Context, payload *dto.Transac
 		Description: payload.Description,
 	}
 
+	if err = bcrypt.CompareHashAndPassword([]byte(senderMeta.PIN), []byte(payload.PIN)); err != nil {
+		err = errs.ErrNoAccess
+		logger.Error().Err(err).Send()
+		return
+	}
+
 	err = s.repository.CreateTransactionP2P(ctx, trxModel)
 	if err != nil {
 		logger.Error().Err(err).Send()
@@ -257,12 +263,6 @@ func (s *service) CreateTransactionSystem(ctx context.Context, payload *dto.Tran
 	} else if exists.AccountType != inconst.ACCOUNT_TYPE_CUST {
 		logger.Error().Err(errs.ErrNotFound).Msgf("recepient accountID: %s is not customer", payload.RecipientID)
 		return errs.ErrBadRequest
-	}
-
-	if err = bcrypt.CompareHashAndPassword([]byte(senderMeta.PIN), []byte(payload.PIN)); err != nil {
-		err = errs.ErrNoAccess
-		logger.Error().Err(err).Send()
-		return
 	}
 
 	trxModel := &model.Transaction{
@@ -332,6 +332,12 @@ func (s *service) CreateTransactionP2B(ctx context.Context, payload *dto.Transac
 	if senderMeta.Balance < payload.Nominal*1.1 {
 		err = errs.ErrInsufficientBalance
 		logger.Error().Err(err).Msgf("accountID: %s does not have enough balance. (has=%.2f, need=%.2f)", senderMeta.Balance, payload.Nominal*1.1)
+		return
+	}
+
+	if err = bcrypt.CompareHashAndPassword([]byte(senderMeta.PIN), []byte(payload.PIN)); err != nil {
+		err = errs.ErrNoAccess
+		logger.Error().Err(err).Send()
 		return
 	}
 
