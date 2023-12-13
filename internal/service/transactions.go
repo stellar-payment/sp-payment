@@ -19,6 +19,7 @@ import (
 	"github.com/stellar-payment/sp-payment/internal/util/timeutil"
 	"github.com/stellar-payment/sp-payment/pkg/dto"
 	"github.com/stellar-payment/sp-payment/pkg/errs"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (s *service) GetAllTransaction(ctx context.Context, params *dto.TransactionsQueryParams) (res *dto.ListTransactionResponse, err error) {
@@ -256,6 +257,12 @@ func (s *service) CreateTransactionSystem(ctx context.Context, payload *dto.Tran
 	} else if exists.AccountType != inconst.ACCOUNT_TYPE_CUST {
 		logger.Error().Err(errs.ErrNotFound).Msgf("recepient accountID: %s is not customer", payload.RecipientID)
 		return errs.ErrBadRequest
+	}
+
+	if err = bcrypt.CompareHashAndPassword([]byte(senderMeta.PIN), []byte(payload.PIN)); err != nil {
+		err = errs.ErrNoAccess
+		logger.Error().Err(err).Send()
+		return
 	}
 
 	trxModel := &model.Transaction{

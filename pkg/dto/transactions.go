@@ -19,6 +19,7 @@ type TransactionPayload struct {
 	TrxStatus   int64   `json:"trx_status" validate:"required"`
 	Nominal     float64 `json:"nominal" validate:"required"`
 	Description string  `json:"description" validate:"required"`
+	PIN         string  `json:"pin"`
 }
 
 type TransactionResponse struct {
