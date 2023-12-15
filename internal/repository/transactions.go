@@ -41,7 +41,7 @@ func (r *repository) FindTransactions(ctx context.Context, params *indto.Transac
 		LeftJoin("customers c1 on a1.owner_id = c1.user_id").
 		LeftJoin("accounts a2 on t.recipient_id = a2.id").
 		LeftJoin("customers c2 on a2.owner_id = c2.user_id and t.trx_type in (1, 9)").
-		LeftJoin("merchants m2 on a2.owner_id = m2.user_id and t.trx_type in (2, 3, 9)").
+		LeftJoin("merchants m2 on a2.owner_id = m2.user_id and t.trx_type in (2, 3, 8)").
 		Where(cond).OrderBy("t.created_at desc")
 
 	if params.Limit != 0 && params.Page >= 1 {
