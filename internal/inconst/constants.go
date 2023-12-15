@@ -25,10 +25,11 @@ const (
 )
 
 const (
-	TRX_TYPE_P2P         = 1
-	TRX_TYPE_P2B         = 2
-	TRX_TYPE_BENEFICIARY = 3
-	TRX_TYPE_SYSTEM      = 9
+	TRX_TYPE_P2P             = 1
+	TRX_TYPE_P2B             = 2
+	TRX_TYPE_BENEFICIARY     = 3
+	TRX_TYPE_MERCHANT_SYSTEM = 8
+	TRX_TYPE_CUST_SYSTEM     = 9
 )
 
 const (

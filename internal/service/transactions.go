@@ -269,7 +269,7 @@ func (s *service) CreateTransactionSystem(ctx context.Context, payload *dto.Tran
 		ID:          snowflake.ID(),
 		AccountID:   conf.SystemAccountUUID,
 		RecipientID: payload.RecipientID,
-		TrxType:     inconst.TRX_TYPE_SYSTEM,
+		TrxType:     inconst.TRX_TYPE_CUST_SYSTEM,
 		TrxDatetime: time.Now(),
 		TrxStatus:   inconst.TRX_STATUS_SUCCESS, // always success
 		TrxFee:      0,

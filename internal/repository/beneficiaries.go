@@ -159,7 +159,7 @@ func (r *repository) CreateBeneficiary(ctx context.Context, payload *model.Benef
 		AccountID:   conf.SystemAccountUUID,
 		RecipientID: payload.AccountID,
 		MerchantID:  payload.MerchantID,
-		TrxType:     inconst.TRX_TYPE_SYSTEM,
+		TrxType:     inconst.TRX_TYPE_MERCHANT_SYSTEM,
 		TrxDatetime: *payload.WithdrawalDate,
 		TrxStatus:   inconst.TRX_STATUS_SUCCESS,
 		TrxFee:      0,
