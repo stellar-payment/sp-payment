@@ -191,6 +191,7 @@ func (s *service) CreateBeneficiary(ctx context.Context, params *dto.Beneficiari
 	repoParams := &indto.SettlementParams{MerchantID: params.MerchantID}
 
 	usrmeta := ctxutil.GetUserCTX(ctx)
+	userID := usrmeta.UserID
 	if usrmeta.RoleID == inconst.ROLE_MERCHANT {
 		merchantMeta, err := s.repository.FindMerchant(ctx, &indto.MerchantParams{UserID: usrmeta.UserID})
 		if err != nil {
@@ -202,11 +203,16 @@ func (s *service) CreateBeneficiary(ctx context.Context, params *dto.Beneficiari
 			return err
 		}
 
+		userID = usrmeta.UserID
 		repoParams.MerchantID = merchantMeta.ID
 	}
 
-	accountMeta, err := s.repository.FindAccount(ctx, &indto.AccountParams{UserID: repoParams.MerchantID})
+	accountMeta, err := s.repository.FindAccount(ctx, &indto.AccountParams{UserID: userID})
 	if err != nil {
+		logger.Error().Err(err).Send()
+		return
+	} else if accountMeta == nil {
+		err = errs.ErrNotFound
 		logger.Error().Err(err).Send()
 		return
 	}
