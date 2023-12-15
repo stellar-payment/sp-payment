@@ -3,10 +3,14 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/godruoyi/go-snowflake"
 	"github.com/rs/zerolog"
+	"github.com/stellar-payment/sp-payment/internal/config"
+	"github.com/stellar-payment/sp-payment/internal/inconst"
 	"github.com/stellar-payment/sp-payment/internal/indto"
 	"github.com/stellar-payment/sp-payment/internal/model"
 	"github.com/stellar-payment/sp-payment/pkg/errs"
@@ -116,6 +120,7 @@ func (r *repository) FindBeneficiary(ctx context.Context, params *indto.Benefici
 
 func (r *repository) CreateBeneficiary(ctx context.Context, payload *model.Beneficiary) (res *model.Beneficiary, err error) {
 	logger := zerolog.Ctx(ctx)
+	conf := config.Get()
 
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -139,6 +144,30 @@ func (r *repository) CreateBeneficiary(ctx context.Context, payload *model.Benef
 	if aff == 0 {
 		err = errs.ErrUnknown
 		logger.Error().Err(err).Msg("settlement not properly affected")
+		return
+	}
+
+	// add sender's fund
+	err = r.updateAccountBalanceTx(ctx, tx, &model.Account{ID: payload.AccountID, Balance: -payload.Amount})
+	if err != nil {
+		logger.Error().Err(err).Send()
+		return
+	}
+
+	_, err = r.CreateTransactionTx(ctx, tx, &model.Transaction{
+		ID:          snowflake.ID(),
+		AccountID:   conf.SystemAccountUUID,
+		RecipientID: payload.AccountID,
+		MerchantID:  payload.MerchantID,
+		TrxType:     inconst.TRX_TYPE_SYSTEM,
+		TrxDatetime: *payload.WithdrawalDate,
+		TrxStatus:   inconst.TRX_STATUS_SUCCESS,
+		TrxFee:      0,
+		Nominal:     payload.Amount,
+		Description: fmt.Sprintf("beneficiary %d withdrawal", payload.ID),
+	})
+	if err != nil {
+		logger.Error().Err(err).Send()
 		return
 	}
 

@@ -205,6 +205,12 @@ func (s *service) CreateBeneficiary(ctx context.Context, params *dto.Beneficiari
 		repoParams.MerchantID = merchantMeta.ID
 	}
 
+	accountMeta, err := s.repository.FindAccount(ctx, &indto.AccountParams{UserID: repoParams.MerchantID})
+	if err != nil {
+		logger.Error().Err(err).Send()
+		return
+	}
+
 	nominal, err := s.repository.FindPendingSettlement(ctx, repoParams)
 	if err != nil {
 		logger.Error().Err(err).Send()
@@ -213,6 +219,7 @@ func (s *service) CreateBeneficiary(ctx context.Context, params *dto.Beneficiari
 
 	beneModel := &model.Beneficiary{
 		ID:             snowflake.ID(),
+		AccountID:      accountMeta.ID,
 		MerchantID:     repoParams.MerchantID,
 		Amount:         nominal,
 		WithdrawalDate: &time.Time{},
