@@ -8,6 +8,7 @@ type TransactionParams struct {
 	RecipientID   string
 
 	TrxType   int64
+	TrxTypes  []int64
 	DateStart time.Time
 	DateEnd   time.Time
 

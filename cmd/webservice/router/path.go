@@ -36,4 +36,10 @@ const (
 	beneficiaryBasepath    = basePath + "/beneficiaries"
 	beneficiaryIDPath      = beneficiaryBasepath + "/:beneficiaryID"
 	beneficiaryPreviewPath = beneficiaryBasepath + "/preview"
+
+	// ----- Dashboard
+	dashboardBasepath     = basePath + "/dashboard"
+	dashboardAdminPath    = dashboardBasepath + "/admin"
+	dashboardMerchantPath = dashboardBasepath + "/merchant"
+	dashboardCustomerPath = dashboardBasepath + "/customer"
 )

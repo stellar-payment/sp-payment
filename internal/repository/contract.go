@@ -59,6 +59,11 @@ type Repository interface {
 	CreateBeneficiary(ctx context.Context, payload *model.Beneficiary) (res *model.Beneficiary, err error)
 	UpdateBeneficiary(ctx context.Context, payload *model.Beneficiary) (err error)
 	DeleteBeneficiary(ctx context.Context, params *indto.BeneficiaryParams) (err error)
+
+	// ---- Dashboard
+	FindAdminDashboard(ctx context.Context) (res *indto.AdminDashboard, err error)
+	FindMerchantDashboard(ctx context.Context, param *indto.MerchantDashboardParams) (res *indto.MerchantDashboard, err error)
+	FindCustomerDashboard(ctx context.Context, param *indto.CustomerDashboardParams) (res *indto.CustomerDashboard, err error)
 }
 
 type repository struct {

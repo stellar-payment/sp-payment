@@ -33,6 +33,14 @@ func Init(params *InitRouterParams) {
 	// ----- Maintenance
 	plainRouter.GET(PingPath, handler.HandlePing(params.Service.Ping))
 
+	// ----- Dashboard
+	secureRouter.GET(dashboardAdminPath, handler.HandleGetAdminDashboard(params.Service.GetAdminDashboard))
+	secureRouter.OPTIONS(dashboardAdminPath, handler.HandleGetAdminDashboard(params.Service.GetAdminDashboard))
+	secureRouter.GET(dashboardCustomerPath, handler.HandleGetCustomerDashboard(params.Service.GetCustomerDashboard))
+	secureRouter.OPTIONS(dashboardCustomerPath, handler.HandleGetCustomerDashboard(params.Service.GetCustomerDashboard))
+	secureRouter.GET(dashboardMerchantPath, handler.HandleGetMerchantDashboard(params.Service.GetMerchantDashboard))
+	secureRouter.OPTIONS(dashboardMerchantPath, handler.HandleGetMerchantDashboard(params.Service.GetMerchantDashboard))
+
 	// ----- Customers
 	secureRouter.GET(customerBasepath, handler.HandleGetCustomers(params.Service.GetAllCustomer))
 	secureRouter.OPTIONS(customerBasepath, handler.HandleGetCustomers(params.Service.GetAllCustomer))

@@ -33,6 +33,12 @@ func (r *repository) FindTransactions(ctx context.Context, params *indto.Transac
 		})
 	}
 
+	if params.TrxType != 0 {
+		cond = append(cond, squirrel.Eq{"t.trx_type": params.TrxType})
+	} else if len(params.TrxTypes) != 0 {
+		cond = append(cond, squirrel.Eq{"t.trx_type": params.TrxTypes})
+	}
+
 	baseStmt := pgSquirrel.Select(
 		"t.id", "t.account_id", "c1.legal_name account_name", "t.recipient_id", "coalesce(c2.legal_name, convert_to(m2.name, 'utf-8')) recipient_name",
 		"t.trx_type", "t.trx_datetime", "t.trx_status", "t.trx_fee", "t.nominal", "t.description").
@@ -94,6 +100,12 @@ func (r *repository) CountTransactions(ctx context.Context, params *indto.Transa
 			squirrel.Eq{"t.account_id": params.AccountID},
 			squirrel.Eq{"t.recipient_id": params.AccountID},
 		})
+	}
+
+	if params.TrxType != 0 {
+		cond = append(cond, squirrel.Eq{"t.trx_type": params.TrxType})
+	} else if len(params.TrxTypes) != 0 {
+		cond = append(cond, squirrel.Eq{"t.trx_type": params.TrxTypes})
 	}
 
 	stmt, args, err := pgSquirrel.Select("count(*)").From("transactions t").

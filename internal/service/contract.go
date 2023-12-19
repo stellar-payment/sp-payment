@@ -62,6 +62,11 @@ type Service interface {
 	GetBeneficiary(ctx context.Context, params *dto.BeneficiariesQueryParams) (res *dto.BeneficiaryResponse, err error)
 	GetBeneficiaryPreview(ctx context.Context, params *dto.BeneficiariesQueryParams) (res float64, err error)
 	CreateBeneficiary(ctx context.Context, params *dto.BeneficiariesQueryParams) (err error)
+
+	// ----- Dashboard
+	GetAdminDashboard(ctx context.Context) (res *dto.AdminDashboard, err error)
+	GetMerchantDashboard(ctx context.Context) (res *dto.MerchantDashboard, err error)
+	GetCustomerDashboard(ctx context.Context) (res *dto.CustomerDashboard, err error)
 }
 
 type service struct {
