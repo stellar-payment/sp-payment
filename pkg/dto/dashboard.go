@@ -29,6 +29,7 @@ type MerchantDashboard struct {
 	TrxNominal         float64                    `json:"trx_nominal"`
 	SettlementNominal  float64                    `json:"settlement_nominal"`
 	BeneficiaryNominal float64                    `json:"beneficiary_nominal"`
+	TrxTraffic         []GenericDashboardGraph    `json:"trx_traffic"`
 	LastTrx            []TransactionMetaDashboard `json:"last_trx"`
 }
 
@@ -39,5 +40,6 @@ type CustomerDashboard struct {
 	PeerTrxNominal     float64                    `json:"peer_trx_nominal"`
 	MerchantTrxCount   int64                      `json:"merchant_trx_count"`
 	MerchantTrxNominal float64                    `json:"merchant_trx_nominal"`
+	TrxTraffic         []GenericDashboardGraph    `json:"trx_traffic"`
 	LastTrx            []TransactionMetaDashboard `json:"last_trx"`
 }

@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -63,9 +62,6 @@ func (r *repository) FindAdminDashboard(ctx context.Context) (res *indto.AdminDa
 		return
 	}
 
-	fmt.Println(stmt)
-	fmt.Println(args)
-
 	rows, err = r.db.QueryxContext(ctx, stmt, args...)
 	if err != nil {
 		logger.Error().Err(err).Str("query", "trx_traffic").Send()
@@ -108,6 +104,7 @@ func (r *repository) FindMerchantDashboard(ctx context.Context, param *indto.Mer
 		TrxNominal:         0,
 		SettlementNominal:  0,
 		BeneficiaryNominal: 0,
+		TrxTraffic:         []indto.GenericDashboardGraph{},
 	}
 
 	stmt = `
@@ -137,6 +134,45 @@ func (r *repository) FindMerchantDashboard(ctx context.Context, param *indto.Mer
 		return
 	}
 
+	stmt, args, err := pgSquirrel.Select("to_char(date_trunc('month', trx_datetime), 'MM') trx_mon", "sum(nominal)").From("transactions").
+		Where(squirrel.And{
+			squirrel.Eq{"deleted_at": nil},
+			squirrel.Eq{"recipient_id": param.AccountID},
+			squirrel.Expr("date_part('year', trx_datetime) = date_part('year', ?::timestamp)", dateStart),
+		}).GroupBy("date_trunc('month', trx_datetime)").ToSql()
+	if err != nil {
+		logger.Error().Err(err).Msg("squirrel err")
+		return
+	}
+
+	rows, err = r.db.QueryxContext(ctx, stmt, args...)
+	if err != nil {
+		logger.Error().Err(err).Str("query", "trx_traffic").Send()
+		return
+	}
+
+	temp := make(map[int64]float64)
+	for rows.Next() {
+		var mon int64
+		var nominal float64
+
+		if err = rows.Scan(&mon, &nominal); err != nil {
+			logger.Error().Err(err).Str("query", "trx_traffic").Msg("sql map err")
+			return
+		}
+
+		temp[mon] = nominal
+	}
+
+	for i := 1; i <= 12; i++ {
+		key := int64(i)
+
+		res.TrxTraffic = append(res.TrxTraffic, indto.GenericDashboardGraph{
+			Key:   key,
+			Value: temp[key],
+		})
+	}
+
 	return
 }
 
@@ -152,6 +188,7 @@ func (r *repository) FindCustomerDashboard(ctx context.Context, param *indto.Cus
 		PeerTrxNominal:     0,
 		MerchantTrxCount:   0,
 		MerchantTrxNominal: 0,
+		TrxTraffic:         []indto.GenericDashboardGraph{},
 	}
 
 	stmt = `
@@ -178,6 +215,45 @@ func (r *repository) FindCustomerDashboard(ctx context.Context, param *indto.Cus
 	if err = rows.StructScan(res); err != nil {
 		logger.Error().Err(err).Str("query", "overall_dashboard").Msg("sql map err")
 		return
+	}
+
+	stmt, args, err := pgSquirrel.Select("to_char(date_trunc('month', trx_datetime), 'MM') trx_mon", "sum(nominal)").From("transactions").
+		Where(squirrel.And{
+			squirrel.Eq{"deleted_at": nil},
+			squirrel.Eq{"account_id": param.AccountID},
+			squirrel.Expr("date_part('year', trx_datetime) = date_part('year', ?::timestamp)", dateStart),
+		}).GroupBy("date_trunc('month', trx_datetime)").ToSql()
+	if err != nil {
+		logger.Error().Err(err).Msg("squirrel err")
+		return
+	}
+
+	rows, err = r.db.QueryxContext(ctx, stmt, args...)
+	if err != nil {
+		logger.Error().Err(err).Str("query", "trx_traffic").Send()
+		return
+	}
+
+	temp := make(map[int64]float64)
+	for rows.Next() {
+		var mon int64
+		var nominal float64
+
+		if err = rows.Scan(&mon, &nominal); err != nil {
+			logger.Error().Err(err).Str("query", "trx_traffic").Msg("sql map err")
+			return
+		}
+
+		temp[mon] = nominal
+	}
+
+	for i := 1; i <= 12; i++ {
+		key := int64(i)
+
+		res.TrxTraffic = append(res.TrxTraffic, indto.GenericDashboardGraph{
+			Key:   key,
+			Value: temp[key],
+		})
 	}
 
 	return

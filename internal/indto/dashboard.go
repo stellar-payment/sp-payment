@@ -27,10 +27,11 @@ type MerchantDashboardParams struct {
 }
 
 type MerchantDashboard struct {
-	TrxCount           int64   `db:"trx_count"`
-	TrxNominal         float64 `db:"trx_nominal"`
-	SettlementNominal  float64 `db:"settlement_nominal"`
-	BeneficiaryNominal float64 `db:"beneficiary_nominal"`
+	TrxCount           int64                   `db:"trx_count"`
+	TrxNominal         float64                 `db:"trx_nominal"`
+	SettlementNominal  float64                 `db:"settlement_nominal"`
+	BeneficiaryNominal float64                 `db:"beneficiary_nominal"`
+	TrxTraffic         []GenericDashboardGraph `db:"-"`
 }
 
 type CustomerDashboardParams struct {
@@ -39,8 +40,9 @@ type CustomerDashboardParams struct {
 }
 
 type CustomerDashboard struct {
-	PeerTrxCount       int64   `db:"peer_trx_count"`
-	PeerTrxNominal     float64 `db:"peer_trx_nominal"`
-	MerchantTrxCount   int64   `db:"merchant_trx_count"`
-	MerchantTrxNominal float64 `db:"merchant_trx_nominal"`
+	PeerTrxCount       int64                   `db:"peer_trx_count"`
+	PeerTrxNominal     float64                 `db:"peer_trx_nominal"`
+	MerchantTrxCount   int64                   `db:"merchant_trx_count"`
+	MerchantTrxNominal float64                 `db:"merchant_trx_nominal"`
+	TrxTraffic         []GenericDashboardGraph `db:"-"`
 }

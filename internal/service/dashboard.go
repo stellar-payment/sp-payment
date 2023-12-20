@@ -128,6 +128,13 @@ func (s *service) GetMerchantDashboard(ctx context.Context) (res *dto.MerchantDa
 		res.LastTrx = append(res.LastTrx, temp)
 	}
 
+	for _, v := range reports.TrxTraffic {
+		res.TrxTraffic = append(res.TrxTraffic, dto.GenericDashboardGraph{
+			Key:   v.Key,
+			Value: v.Value,
+		})
+	}
+
 	return
 }
 
@@ -210,6 +217,13 @@ func (s *service) GetCustomerDashboard(ctx context.Context) (res *dto.CustomerDa
 		}
 
 		res.LastTrx = append(res.LastTrx, temp)
+	}
+
+	for _, v := range reports.TrxTraffic {
+		res.TrxTraffic = append(res.TrxTraffic, dto.GenericDashboardGraph{
+			Key:   v.Key,
+			Value: v.Value,
+		})
 	}
 
 	return
