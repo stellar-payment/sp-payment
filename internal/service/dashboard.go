@@ -68,9 +68,15 @@ func (s *service) GetMerchantDashboard(ctx context.Context) (res *dto.MerchantDa
 		return
 	}
 
+	merchantData, err := s.repository.FindMerchant(ctx, &indto.MerchantParams{UserID: data.OwnerID})
+	if err != nil {
+		logger.Error().Err(err).Send()
+		return
+	}
+
 	reports, err := s.repository.FindMerchantDashboard(ctx, &indto.MerchantDashboardParams{
 		AccountID:  data.ID,
-		MerchantID: data.OwnerID,
+		MerchantID: merchantData.ID,
 	})
 	if err != nil {
 		logger.Error().Err(err).Send()
@@ -145,9 +151,15 @@ func (s *service) GetCustomerDashboard(ctx context.Context) (res *dto.CustomerDa
 		return
 	}
 
+	customerMeta, err := s.repository.FindCustomer(ctx, &indto.CustomerParams{UserID: data.OwnerID})
+	if err != nil {
+		logger.Error().Err(err).Send()
+		return
+	}
+
 	reports, err := s.repository.FindCustomerDashboard(ctx, &indto.CustomerDashboardParams{
 		AccountID:  data.ID,
-		CustomerID: data.OwnerID,
+		CustomerID: customerMeta.ID,
 	})
 	if err != nil {
 		logger.Error().Err(err).Send()
