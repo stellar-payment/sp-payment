@@ -10,6 +10,7 @@ type TransactionMetaDashboard struct {
 	RecipientName string  `json:"recipient_name"`
 	Nominal       float64 `json:"nominal"`
 	TrxDate       string  `json:"trx_date"`
+	TrxType       int64   `json:"trx_type"`
 }
 
 type AdminDashboard struct {

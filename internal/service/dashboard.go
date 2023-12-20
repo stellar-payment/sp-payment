@@ -109,7 +109,8 @@ func (s *service) GetMerchantDashboard(ctx context.Context) (res *dto.MerchantDa
 			SenderName:    "",
 			RecipientName: "",
 			Nominal:       v.Nominal,
-			TrxDate:       timeutil.FormatDate(v.TrxDatetime),
+			TrxDate:       timeutil.FormatLocaltime(v.TrxDatetime),
+			TrxType:       v.TrxType,
 		}
 
 		if v.AccountName != nil {
@@ -192,7 +193,8 @@ func (s *service) GetCustomerDashboard(ctx context.Context) (res *dto.CustomerDa
 			SenderName:    "",
 			RecipientName: "",
 			Nominal:       v.Nominal,
-			TrxDate:       timeutil.FormatDate(v.TrxDatetime),
+			TrxDate:       timeutil.FormatLocaltime(v.TrxDatetime),
+			TrxType:       v.TrxType,
 		}
 
 		if v.AccountName != nil {
