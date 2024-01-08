@@ -43,3 +43,7 @@ const (
 	BNF_STATUS_PENDING = 0
 	BNF_STATUS_CONFIRM = 1
 )
+
+const (
+	CACHE_TRX_KEY = "%s-%s:%s:%d"
+)

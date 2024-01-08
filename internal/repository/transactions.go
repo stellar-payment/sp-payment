@@ -21,8 +21,8 @@ func (r *repository) FindTransactions(ctx context.Context, params *indto.Transac
 
 	if !params.DateStart.IsZero() && !params.DateEnd.IsZero() {
 		cond = append(cond,
-			squirrel.Expr("date(t.trx_date) >= date(?)", params.DateStart),
-			squirrel.Expr("date(t.trx_date) <= date(?)", params.DateEnd),
+			squirrel.Expr("date(t.trx_datetime) >= date(?)", params.DateStart),
+			squirrel.Expr("date(t.trx_datetime) <= date(?)", params.DateEnd),
 		)
 	}
 
@@ -48,7 +48,7 @@ func (r *repository) FindTransactions(ctx context.Context, params *indto.Transac
 		LeftJoin("accounts a2 on t.recipient_id = a2.id").
 		LeftJoin("customers c2 on a2.owner_id = c2.user_id and t.trx_type in (1, 9)").
 		LeftJoin("merchants m2 on a2.owner_id = m2.user_id and t.trx_type in (2, 3, 8)").
-		Where(cond).OrderBy("t.created_at desc")
+		Where(cond).OrderBy("t.trx_datetime desc")
 
 	if params.Limit != 0 && params.Page >= 1 {
 		baseStmt = baseStmt.Limit(params.Limit).Offset((params.Page - 1) * params.Limit)
@@ -90,8 +90,8 @@ func (r *repository) CountTransactions(ctx context.Context, params *indto.Transa
 
 	if !params.DateStart.IsZero() && !params.DateEnd.IsZero() {
 		cond = append(cond,
-			squirrel.Expr("date(t.trx_date) >= date(?)", params.DateStart),
-			squirrel.Expr("date(t.trx_date) <= date(?)", params.DateEnd),
+			squirrel.Expr("date(t.trx_datetime) >= date(?)", params.DateStart),
+			squirrel.Expr("date(t.trx_datetime) <= date(?)", params.DateEnd),
 		)
 	}
 
