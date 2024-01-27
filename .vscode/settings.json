@@ -1,3 +1,5 @@
 {
-   "go.inferGopath": false
+   "go.inferGopath": false,
+   "discord.detailsEditing": "Editing {file_name}",
+   "discord.lowerDetailsEditing": "Workspace: {workspace}"
 }
